@@ -4,7 +4,9 @@
   "dependencies": [],
   "entryPoint": "AFrame.Game.Character.CharacterModuleAsset",
   "sourceRoots": [
-    "Runtime",
+    "Contracts",
+    "Core",
+    "Unity",
     "Definitions"
   ],
   "definitionSources": [

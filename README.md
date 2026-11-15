@@ -2,7 +2,7 @@
 
 AFrame is a modular Unity 6 framework for small and medium-sized games. It keeps gameplay rules in pure C# modules and uses Unity as the composition and presentation layer.
 
-The implementation target is documented in [Docs/AFrame-Architecture-v2.1.md](Docs/AFrame-Architecture-v2.1.md). The document distinguishes the current v1 implementation from the v2.1 migration target.
+The implementation target is documented in [Docs/AFrame-Architecture-v2.2.md](Docs/AFrame-Architecture-v2.2.md). The document distinguishes the current implementation from the v2.2 migration target.
 
 ## Project layout
 
@@ -10,6 +10,8 @@ The implementation target is documented in [Docs/AFrame-Architecture-v2.1.md](Do
 - `Assets/Game/Features` contains project-owned vertical features.
 - `Assets/Game/Generated` contains generated definition assets and machine-readable reports.
 - `Tasks` contains bounded development task contracts.
+- `Context` contains committed machine-readable project context.
+- `Tools/aframe` provides the batchmode validation and smoke entry points.
 
 ## Editor workflow
 
@@ -20,6 +22,9 @@ Use the `AFrame` menu in Unity:
 - `AFrame/Project/Validate Architecture`
 - `AFrame/Project/Build Context`
 - `AFrame/Project/Run Smoke Check`
+- `AFrame/Project/Validate Task`
+
+The same validation entry points are available from `Tools/aframe validate`, `Tools/aframe context`, `Tools/aframe smoke`, and `Tools/aframe check`.
 
 The framework does not call an AI service. Its package boundaries, task files and validation reports give external development tools a stable way to extend the project without adding hidden global state or cross-feature dependencies.
 

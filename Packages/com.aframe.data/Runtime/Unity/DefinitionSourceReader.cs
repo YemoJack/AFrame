@@ -1,10 +1,22 @@
+using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 namespace AFrame.Data
 {
     public static class DefinitionSourceReader
     {
+        public static string ComputeHash(string value)
+        {
+            using (var sha = SHA256.Create())
+            {
+                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(value ?? string.Empty));
+                return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLowerInvariant();
+            }
+        }
+
         public static bool TryRead(
             string path,
             out DefinitionDocument document,

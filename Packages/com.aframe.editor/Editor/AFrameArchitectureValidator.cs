@@ -19,6 +19,7 @@ namespace AFrame.Editor
             var issues = new List<ValidationIssue>();
             ValidateFeatures(issues);
             ValidateDefinitions(issues);
+            ValidateGeneratedDefinitions(issues);
             ValidateDomainBoundaries(issues);
             ValidateProfiles(issues);
 
@@ -127,6 +128,48 @@ namespace AFrame.Editor
                 if (!ids.Add(document.id))
                     Add(issues, "error", path, $"Definition id is duplicated: {document.id}.");
             }
+        }
+
+        private static void ValidateGeneratedDefinitions(List<ValidationIssue> issues)
+        {
+            if (!Directory.Exists("Assets/Game/Generated/Definitions"))
+                return;
+
+            var sourcePaths = Directory.Exists("Assets/Game")
+                ? Directory.GetFiles("Assets/Game", "*.aframe.json", SearchOption.AllDirectories)
+                : Array.Empty<string>();
+
+            foreach (var sourcePath in sourcePaths)
+            {
+                var normalized = sourcePath.Replace('\\', '/');
+                if (normalized.IndexOf("/Generated/", StringComparison.Ordinal) >= 0)
+                    continue;
+                if (!DefinitionSourceReader.TryRead(normalized, out var document, out var json, out _))
+                    continue;
+
+                var assetPath = "Assets/Game/Generated/Definitions/" + SanitizeAssetName(document.id) + ".asset";
+                var asset = AssetDatabase.LoadAssetAtPath<AFrameDefinitionAsset>(assetPath);
+                if (asset == null)
+                {
+                    Add(issues, "error", assetPath, $"Generated definition is missing for source id {document.id}.");
+                    continue;
+                }
+
+                var hash = DefinitionSourceReader.ComputeHash(json);
+                if (!string.Equals(asset.SourceHash, hash, StringComparison.Ordinal)
+                    || !string.Equals(asset.SourcePath, normalized, StringComparison.Ordinal))
+                {
+                    Add(issues, "error", assetPath, "Generated definition is out of date. Run AFrame/Content/Import Definitions.");
+                }
+            }
+        }
+
+        private static string SanitizeAssetName(string value)
+        {
+            var builder = new System.Text.StringBuilder(value == null ? 0 : value.Length);
+            foreach (var character in value ?? string.Empty)
+                builder.Append(char.IsLetterOrDigit(character) || character == '_' || character == '-' ? character : '_');
+            return builder.Length == 0 ? "Definition" : builder.ToString();
         }
 
         private static void ValidateDomainBoundaries(List<ValidationIssue> issues)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using AFrame.Data;
 using UnityEditor;
@@ -11,6 +10,7 @@ namespace AFrame.Editor
 {
     public static class AFrameDefinitionImporter
     {
+        public const string GeneratorVersion = "2.2.0";
         public const string SourceRoot = "Assets/Game";
         public const string GeneratedRoot = "Assets/Game/Generated/Definitions";
 
@@ -62,7 +62,8 @@ namespace AFrame.Editor
                     document,
                     json,
                     normalizedPath,
-                    ComputeHash(json));
+                    DefinitionSourceReader.ComputeHash(json),
+                    GeneratorVersion);
                 EditorUtility.SetDirty(asset);
                 imported++;
             }
@@ -84,13 +85,5 @@ namespace AFrame.Editor
             return builder.Length == 0 ? "Definition" : builder.ToString();
         }
 
-        private static string ComputeHash(string value)
-        {
-            using (var sha = SHA256.Create())
-            {
-                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
-                return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLowerInvariant();
-            }
-        }
     }
 }

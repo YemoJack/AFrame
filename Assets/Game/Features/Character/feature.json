@@ -1,0 +1,10 @@
+{
+  "id": "character",
+  "version": "0.2.0",
+  "summary": "平面角色移动",
+  "physicsAuthority": "domain",
+  "supports": {
+    "dimensions": ["2d", "3d"],
+    "network": ["offline"]
+  }
+}

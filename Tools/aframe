@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+command_name=${1:-}
+shift || true
+
+case "$command_name" in
+  validate)
+    method=AFrame.Editor.AFrameMenuItems.ValidateArchitecture
+    ;;
+  context)
+    method=AFrame.Editor.AFrameMenuItems.BuildContext
+    ;;
+  smoke)
+    method=AFrame.Editor.AFrameMenuItems.RunSmokeCheck
+    ;;
+  task)
+    method=AFrame.Editor.AFrameMenuItems.ValidateTask
+    ;;
+  check)
+    method=AFrame.Editor.AFrameMenuItems.ValidateTask
+    ;;
+  *)
+    echo "Usage: Tools/aframe {validate|context|smoke|task|check}" >&2
+    exit 2
+    ;;
+esac
+
+exec unity run "$project_root" --allow-install -- --executeMethod "$method" -quit -batchmode -nographics "$@"

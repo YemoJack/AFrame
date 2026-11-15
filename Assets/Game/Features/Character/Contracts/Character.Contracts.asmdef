@@ -1,0 +1,14 @@
+{
+  "name": "AFrame.Game.Character.Contracts",
+  "rootNamespace": "AFrame.Game.Character",
+  "references": ["AFrame.Foundation", "AFrame.Runtime", "AFrame.Data"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

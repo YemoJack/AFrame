@@ -5,6 +5,7 @@
     "AFrame.Foundation",
     "AFrame.Runtime",
     "AFrame.Data",
+    "AFrame.Data.Unity",
     "AFrame.Unity"
   ],
   "includePlatforms": [

@@ -43,6 +43,10 @@ namespace AFrame.Editor
                 JsonUtility.ToJson(manifest, true) + Environment.NewLine);
 
             WriteIfMissing(
+                $"{root}/feature.json",
+                $"{{\n  \"id\": \"game.{ToKebabCase(typeName)}\",\n  \"version\": \"0.1.0\",\n  \"summary\": \"{typeName}\",\n  \"physicsAuthority\": \"none\",\n  \"supports\": {{ \"dimensions\": [\"2d\", \"3d\"], \"network\": [\"offline\"] }}\n}}\n");
+
+            WriteIfMissing(
                 $"{runtimeRoot}/Application/{typeName}Module.cs",
                 $"using System;\nusing System.Collections.Generic;\nusing AFrame.Foundation;\nusing AFrame.Runtime;\n\nnamespace AFrame.Game.{typeName}\n{{\n    public sealed class {typeName}Module : IGameModule\n    {{\n        private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();\n\n        public ModuleId Id => new ModuleId(\"game.{ToKebabCase(typeName)}\");\n        public ModuleScope Scope => ModuleScope.Session;\n        public IReadOnlyList<ModuleId> Dependencies => NoDependencies;\n\n        public void Configure(IModuleBuilder builder) {{ }}\n        public void Start(ModuleContext context) {{ }}\n        public void Stop() {{ }}\n    }}\n}}\n");
 

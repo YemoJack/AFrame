@@ -13,7 +13,7 @@ namespace AFrame.Editor
 {
     public static class AFrameContextBuilder
     {
-        private const string ContextRoot = "Assets/Game/Generated/Context";
+        private const string ContextRoot = "Context";
 
         public static void Build()
         {

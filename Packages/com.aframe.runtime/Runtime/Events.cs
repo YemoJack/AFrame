@@ -15,7 +15,17 @@ namespace AFrame.Runtime
         void Publish<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent;
     }
 
-    public sealed class EventStream : IEventStream, IEventPublisher
+    public interface IEventSink
+    {
+        void Raise<TEvent>(in TEvent domainEvent) where TEvent : struct, IDomainEvent;
+    }
+
+    public interface IEventSubscriber<TEvent> where TEvent : struct, IDomainEvent
+    {
+        void On(in TEvent domainEvent);
+    }
+
+    public sealed class EventStream : IEventStream, IEventPublisher, IEventSink
     {
         private readonly Dictionary<Type, List<Delegate>> subscribers =
             new Dictionary<Type, List<Delegate>>();
@@ -40,6 +50,11 @@ namespace AFrame.Runtime
         public void Publish<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
         {
             pending.Enqueue(() => Dispatch(domainEvent));
+        }
+
+        public void Raise<TEvent>(in TEvent domainEvent) where TEvent : struct, IDomainEvent
+        {
+            Publish(domainEvent);
         }
 
         public void Flush(int maxEvents = 4096)

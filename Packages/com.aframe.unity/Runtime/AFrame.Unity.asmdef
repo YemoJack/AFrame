@@ -4,7 +4,8 @@
   "references": [
     "AFrame.Foundation",
     "AFrame.Runtime",
-    "AFrame.Data"
+    "AFrame.Data",
+    "AFrame.Data.Unity"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

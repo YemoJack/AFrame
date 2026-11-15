@@ -1,10 +1,7 @@
 {
-  "name": "AFrame.Game.Character.Domain",
+  "name": "AFrame.Game.Character.Core",
   "rootNamespace": "AFrame.Game.Character",
-  "references": [
-    "AFrame.Foundation",
-    "AFrame.Runtime"
-  ],
+  "references": ["AFrame.Foundation", "AFrame.Runtime", "AFrame.Data", "AFrame.Game.Character.Contracts"],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

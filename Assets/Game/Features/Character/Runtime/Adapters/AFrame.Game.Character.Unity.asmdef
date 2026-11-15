@@ -5,7 +5,8 @@
     "AFrame.Foundation",
     "AFrame.Runtime",
     "AFrame.Unity",
-    "AFrame.Game.Character.Domain",
+    "AFrame.Game.Character.Contracts",
+    "AFrame.Game.Character.Core",
     "Unity.InputSystem"
   ],
   "includePlatforms": [],

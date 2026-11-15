@@ -38,5 +38,15 @@ namespace AFrame.Editor
             else
                 Debug.LogError("AFrame smoke check failed. See Assets/Game/Generated/ValidationReport.json.");
         }
+
+        [MenuItem("AFrame/Project/Validate Task")]
+        private static void ValidateTask()
+        {
+            var report = AFrameTaskValidator.ValidateFirstTask();
+            if (report.succeeded)
+                Debug.Log("AFrame task validation succeeded.");
+            else
+                Debug.LogError("AFrame task validation found errors. See Assets/Game/Generated/TaskValidationReport.json.");
+        }
     }
 }

@@ -79,13 +79,19 @@ namespace AFrame.Runtime
         void Send(PlayerId issuer, ICommand command);
     }
 
+    public interface ICommandSink
+    {
+        void Submit<TCommand>(PlayerId issuer, in TCommand command)
+            where TCommand : struct, ICommand;
+    }
+
     internal interface ICommandQueue
     {
         void BeginTick(long tick);
         IReadOnlyList<CommandEnvelope> Drain(long tick);
     }
 
-    public sealed class LocalCommandTransport : ICommandTransport, ICommandQueue
+    public sealed class LocalCommandTransport : ICommandTransport, ICommandSink, ICommandQueue
     {
         private readonly List<CommandEnvelope> pending = new List<CommandEnvelope>();
         private long currentTick;
@@ -99,6 +105,12 @@ namespace AFrame.Runtime
                 throw new ArgumentNullException(nameof(command));
 
             pending.Add(new CommandEnvelope(issuer, currentTick + 1, sequence++, command));
+        }
+
+        public void Submit<TCommand>(PlayerId issuer, in TCommand command)
+            where TCommand : struct, ICommand
+        {
+            Send(issuer, command);
         }
 
         void ICommandQueue.BeginTick(long tick) => currentTick = tick;

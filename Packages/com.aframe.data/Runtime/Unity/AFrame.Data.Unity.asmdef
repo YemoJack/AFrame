@@ -1,0 +1,17 @@
+{
+  "name": "AFrame.Data.Unity",
+  "rootNamespace": "AFrame.Data",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Data"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -24,6 +24,13 @@ namespace AFrame.Runtime
         void FixedTick(in TickContext context);
     }
 
+    public interface IQuery { }
+
+    public interface IInputSource<TInput> where TInput : struct
+    {
+        TInput Get(PlayerId player);
+    }
+
     public interface IGameModule
     {
         ModuleId Id { get; }
@@ -93,6 +100,7 @@ namespace AFrame.Runtime
             services.Add<IClock>(clock ?? new SystemClock());
             services.Add<ICommandDispatcher>(dispatcher);
             services.Add<ICommandTransport>(transport);
+            services.Add<ICommandSink>(transport);
             services.Add<IEventStream>(events);
             services.Add<IEventPublisher>(events);
 
@@ -148,6 +156,7 @@ namespace AFrame.Runtime
         public void Dispose() => Stop();
     }
 
+    [StableId("aframe.command_rejected")]
     public readonly struct CommandRejectedEvent : IDomainEvent
     {
         public CommandRejectedEvent(CommandEnvelope command, AFrameError error)
