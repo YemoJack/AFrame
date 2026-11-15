@@ -40,7 +40,7 @@ namespace AFrame.Unity
             accumulator += Time.deltaTime;
             var tickDelta = profile.TickDeltaTime;
             var ticks = 0;
-            while (accumulator >= tickDelta && ticks < profile.MaxTicksPerFrame)
+            while (isActiveAndEnabled && IsRunning && accumulator >= tickDelta && ticks < profile.MaxTicksPerFrame)
             {
                 accumulator -= tickDelta;
                 host.Tick();
