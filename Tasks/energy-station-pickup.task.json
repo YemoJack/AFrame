@@ -1,0 +1,16 @@
+{
+  "id": "energy-station-pickup",
+  "goal": "Route Energy Station pickups through Pickup and Inventory so each core counts once.",
+  "allowedPaths": [
+    "Assets/Game/Features/Pickup/**",
+    "Assets/Game/Features/Inventory/**",
+    "Assets/Game/Composition/EnergyStation/**"
+  ],
+  "readOnlyPaths": ["Packages/**", "ProjectSettings/**"],
+  "features": ["pickup", "inventory"],
+  "acceptance": [
+    "Entering a core's trigger adds one to the HUD and hides the collected core.",
+    "Entering the same trigger again cannot increase the count.",
+    "Collecting all three cores opens the exit."
+  ]
+}

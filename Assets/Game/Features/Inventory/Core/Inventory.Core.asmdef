@@ -1,0 +1,9 @@
+{
+  "name": "AFrame.Game.Inventory.Core",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime",
+    "AFrame.Game.Inventory.Contracts"
+  ],
+  "noEngineReferences": true
+}

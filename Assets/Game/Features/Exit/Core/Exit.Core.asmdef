@@ -1,0 +1,10 @@
+{
+  "name": "AFrame.Game.Exit.Core",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime",
+    "AFrame.Game.Exit.Contracts",
+    "AFrame.Game.Inventory.Contracts"
+  ],
+  "noEngineReferences": true
+}

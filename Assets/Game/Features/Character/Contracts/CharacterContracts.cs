@@ -10,6 +10,19 @@ namespace AFrame.Game.Character
         public Float3 Direction { get; }
     }
 
+    [StableId("character.set_movement")]
+    public readonly struct SetCharacterMovement : ICommand
+    {
+        public SetCharacterMovement(Float3 direction, bool sprinting = false)
+        {
+            Direction = direction;
+            Sprinting = sprinting;
+        }
+
+        public Float3 Direction { get; }
+        public bool Sprinting { get; }
+    }
+
     [StableId("character.moved")]
     public readonly struct CharacterMovedEvent : IDomainEvent
     {

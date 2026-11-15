@@ -1,0 +1,14 @@
+{
+  "id": "inventory",
+  "version": "0.1.0",
+  "summary": "记录唯一的能源核心与收集进度。",
+  "physicsAuthority": "none",
+  "supports": {
+    "dimensions": [
+      "3d"
+    ],
+    "network": [
+      "offline"
+    ]
+  }
+}

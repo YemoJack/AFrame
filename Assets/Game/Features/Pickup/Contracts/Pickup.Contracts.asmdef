@@ -1,0 +1,8 @@
+{
+  "name": "AFrame.Game.Pickup.Contracts",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime"
+  ],
+  "noEngineReferences": true
+}

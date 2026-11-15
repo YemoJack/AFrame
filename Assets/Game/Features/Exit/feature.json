@@ -1,0 +1,14 @@
+{
+  "id": "exit",
+  "version": "0.1.0",
+  "summary": "集齐能源核心后解锁出口并判定通关。",
+  "physicsAuthority": "none",
+  "supports": {
+    "dimensions": [
+      "3d"
+    ],
+    "network": [
+      "offline"
+    ]
+  }
+}

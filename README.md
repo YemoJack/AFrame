@@ -33,3 +33,9 @@ The framework does not call an AI service. Its package boundaries, task files an
 The target runtime uses a fixed Tick. Input and network adapters enqueue typed commands, domain modules handle them, and queued domain events update views, UI, saving and network adapters. The first migration slice keeps the current Editor menu workflow while the runtime contracts are upgraded.
 
 The first sample feature is `Character`, split into a Unity-independent domain assembly and a Unity adapter assembly.
+
+## Energy Station demo
+
+Open [EnergyStation.unity](Assets/Game/Scenes/EnergyStation.unity) and press Play. Move with WASD or the arrow keys and hold Shift to sprint. Collect three amber energy cores and reach the green exit before the 45-second countdown expires. Press R to start a new run at any time. The room is assembled when Play starts.
+
+Character drives movement on a fixed Tick. Pickup forwards collection commands to Inventory, which counts each core once and publishes the event that hides it. Exit reads Inventory progress and finishes the session when the player reaches the unlocked exit. See the [example AI task](Tasks/energy-station-pickup.task.json) for the scope and acceptance criteria of the pickup flow.

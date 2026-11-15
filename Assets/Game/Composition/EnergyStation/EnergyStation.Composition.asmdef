@@ -1,0 +1,17 @@
+{
+  "name": "AFrame.Game.EnergyStation.Composition",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime",
+    "AFrame.Unity",
+    "Unity.InputSystem",
+    "AFrame.Game.Character.Unity",
+    "AFrame.Game.Inventory.Contracts",
+    "AFrame.Game.Inventory.Core",
+    "AFrame.Game.Pickup.Contracts",
+    "AFrame.Game.Pickup.Core",
+    "AFrame.Game.Exit.Contracts",
+    "AFrame.Game.Exit.Core"
+  ],
+  "noEngineReferences": false
+}

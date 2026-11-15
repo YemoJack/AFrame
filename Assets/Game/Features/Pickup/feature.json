@@ -1,0 +1,14 @@
+{
+  "id": "pickup",
+  "version": "0.1.0",
+  "summary": "把触发区交互转换为拾取命令。",
+  "physicsAuthority": "none",
+  "supports": {
+    "dimensions": [
+      "3d"
+    ],
+    "network": [
+      "offline"
+    ]
+  }
+}

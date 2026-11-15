@@ -13,13 +13,16 @@ namespace AFrame.Game.Character
         private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();
 
         [SerializeField] private float speed = 5f;
+        [SerializeField] private Vector2 movementBounds;
 
         public override IReadOnlyList<ModuleId> Dependencies => NoDependencies;
 
         public override IGameModule CreateModule()
         {
-            return new CharacterModule(speed);
+            return new CharacterModule(speed, new Float3(movementBounds.x, 0f, movementBounds.y));
         }
+
+        public void SetMovementBounds(Vector2 bounds) => movementBounds = bounds;
 
         public void SetDefaults()
         {
