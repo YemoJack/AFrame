@@ -1,0 +1,14 @@
+{
+  "name": "com.aframe.physics",
+  "version": "0.1.0",
+  "displayName": "AFrame Physics",
+  "description": "Physics ports shared by 2D and 3D adapters.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.foundation": "file:../com.aframe.foundation"
+  }
+}

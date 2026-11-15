@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "AFame.slnx",
+    "dotnet.defaultSolution": "AFrame.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }

@@ -1,0 +1,17 @@
+{
+  "name": "com.aframe.editor",
+  "version": "0.1.0",
+  "displayName": "AFrame Editor",
+  "description": "Scaffolding, validation and machine-readable project context for AFrame projects.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.foundation": "file:../com.aframe.foundation",
+    "com.aframe.runtime": "file:../com.aframe.runtime",
+    "com.aframe.data": "file:../com.aframe.data",
+    "com.aframe.unity": "file:../com.aframe.unity"
+  }
+}

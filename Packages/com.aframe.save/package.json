@@ -1,0 +1,15 @@
+{
+  "name": "com.aframe.save",
+  "version": "0.1.0",
+  "displayName": "AFrame Save",
+  "description": "Save adapters that keep persistence outside the domain layer.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.foundation": "file:../com.aframe.foundation",
+    "com.aframe.runtime": "file:../com.aframe.runtime"
+  }
+}

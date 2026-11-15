@@ -1,0 +1,18 @@
+{
+  "id": "game.character",
+  "version": "0.1.0",
+  "dependencies": [],
+  "entryPoint": "AFrame.Game.Character.CharacterModuleAsset",
+  "sourceRoots": [
+    "Runtime",
+    "Definitions"
+  ],
+  "definitionSources": [
+    "Definitions/**/*.aframe.json"
+  ],
+  "acceptanceChecks": [
+    "compile",
+    "import-definitions",
+    "smoke"
+  ]
+}

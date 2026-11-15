@@ -1,0 +1,16 @@
+{
+  "name": "com.aframe.input",
+  "version": "0.1.0",
+  "displayName": "AFrame Input",
+  "description": "Input ports that translate Unity input into AFrame commands.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.foundation": "file:../com.aframe.foundation",
+    "com.aframe.runtime": "file:../com.aframe.runtime",
+    "com.unity.inputsystem": "1.20.1"
+  }
+}

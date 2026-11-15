@@ -1,0 +1,20 @@
+{
+  "name": "AFrame.Game.Character.Unity",
+  "rootNamespace": "AFrame.Game.Character",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime",
+    "AFrame.Unity",
+    "AFrame.Game.Character.Domain",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

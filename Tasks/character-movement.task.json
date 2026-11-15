@@ -1,0 +1,25 @@
+{
+  "id": "character-movement",
+  "goal": "Extend the Character feature without moving rules into Unity scene scripts.",
+  "allowedPaths": [
+    "Assets/Game/Features/Character/Runtime",
+    "Assets/Game/Features/Character/Definitions",
+    "Assets/Game/Features/Character/Docs"
+  ],
+  "modules": [
+    "com.aframe.foundation",
+    "com.aframe.runtime",
+    "com.aframe.unity"
+  ],
+  "forbiddenPaths": [
+    "Assets/Game/Generated",
+    "Library",
+    "Temp"
+  ],
+  "acceptanceChecks": [
+    "AFrame/Project/Validate Architecture",
+    "AFrame/Content/Import Definitions",
+    "AFrame/Project/Run Smoke Check"
+  ],
+  "changeManifest": "Tasks/character-movement.changes.json"
+}

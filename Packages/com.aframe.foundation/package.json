@@ -1,0 +1,11 @@
+{
+  "name": "com.aframe.foundation",
+  "version": "0.1.0",
+  "displayName": "AFrame Foundation",
+  "description": "Unity-independent primitives shared by AFrame modules.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library"
+}

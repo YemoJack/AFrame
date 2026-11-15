@@ -1,0 +1,17 @@
+{
+  "name": "AFrame.Save",
+  "rootNamespace": "AFrame.Save",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

@@ -1,0 +1,17 @@
+{
+  "name": "AFrame.Network",
+  "rootNamespace": "AFrame.Network",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

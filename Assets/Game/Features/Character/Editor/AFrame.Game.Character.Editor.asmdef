@@ -1,0 +1,19 @@
+{
+  "name": "AFrame.Game.Character.Editor",
+  "rootNamespace": "AFrame.Game.Character",
+  "references": [
+    "AFrame.Unity",
+    "AFrame.Game.Character.Unity"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

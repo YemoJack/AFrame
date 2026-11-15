@@ -1,0 +1,14 @@
+{
+  "name": "com.aframe.ui",
+  "version": "0.1.0",
+  "displayName": "AFrame UI",
+  "description": "Presentation ports for screen and widget navigation.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.runtime": "file:../com.aframe.runtime"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "AFrame.Game.Character.Domain",
+  "rootNamespace": "AFrame.Game.Character",
+  "references": [
+    "AFrame.Foundation",
+    "AFrame.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

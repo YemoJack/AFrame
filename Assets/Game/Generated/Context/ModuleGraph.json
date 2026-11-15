@@ -1,0 +1,13 @@
+{
+    "profiles": [
+        {
+            "profile": "Assets/Game/Composition/DefaultGameProfile.asset",
+            "modules": [
+                {
+                    "id": "game.character",
+                    "dependencies": []
+                }
+            ]
+        }
+    ]
+}
