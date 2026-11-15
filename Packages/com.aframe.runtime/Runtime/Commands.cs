@@ -1,72 +1,122 @@
 using System;
 using System.Collections.Generic;
+using AFrame.Foundation;
 
 namespace AFrame.Runtime
 {
     public interface ICommand { }
 
-    public interface ICommandHandler<in TCommand> where TCommand : ICommand
+    public readonly struct CommandEnvelope
     {
-        void Handle(TCommand command);
+        public CommandEnvelope(PlayerId issuer, long tick, long sequence, ICommand payload)
+        {
+            Issuer = issuer;
+            Tick = tick;
+            Sequence = sequence;
+            Payload = payload ?? throw new ArgumentNullException(nameof(payload));
+        }
+
+        public PlayerId Issuer { get; }
+        public long Tick { get; }
+        public long Sequence { get; }
+        public ICommand Payload { get; }
+    }
+
+    public interface ICommandHandler<TCommand> where TCommand : struct, ICommand
+    {
+        Result Handle(in CommandEnvelope envelope, in TCommand command);
     }
 
     public interface ICommandDispatcher
     {
-        void Register<TCommand>(ICommandHandler<TCommand> handler) where TCommand : ICommand;
-        void Dispatch(ICommand command);
+        void Register<TCommand>(ICommandHandler<TCommand> handler)
+            where TCommand : struct, ICommand;
     }
 
-    public sealed class CommandDispatcher : ICommandDispatcher
+    internal interface ICommandExecutor
     {
-        private readonly Dictionary<Type, List<Action<ICommand>>> handlers =
-            new Dictionary<Type, List<Action<ICommand>>>();
+        Result Dispatch(in CommandEnvelope envelope);
+    }
 
-        public void Register<TCommand>(ICommandHandler<TCommand> handler) where TCommand : ICommand
+    public sealed class CommandDispatcher : ICommandDispatcher, ICommandExecutor
+    {
+        private readonly Dictionary<Type, Func<CommandEnvelope, Result>> handlers =
+            new Dictionary<Type, Func<CommandEnvelope, Result>>();
+
+        public void Register<TCommand>(ICommandHandler<TCommand> handler)
+            where TCommand : struct, ICommand
         {
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
 
             var commandType = typeof(TCommand);
-            if (!handlers.TryGetValue(commandType, out var commandHandlers))
-            {
-                commandHandlers = new List<Action<ICommand>>();
-                handlers.Add(commandType, commandHandlers);
-            }
+            if (handlers.ContainsKey(commandType))
+                throw new InvalidOperationException(
+                    $"A command handler is already registered for {commandType.FullName}.");
 
-            commandHandlers.Add(command => handler.Handle((TCommand)command));
+            handlers.Add(commandType, envelope =>
+            {
+                if (!(envelope.Payload is TCommand command))
+                    return Result.Fail("command.type_mismatch", commandType.FullName);
+
+                return handler.Handle(in envelope, in command);
+            });
         }
 
-        public void Dispatch(ICommand command)
+        Result ICommandExecutor.Dispatch(in CommandEnvelope envelope)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
+            var commandType = envelope.Payload.GetType();
+            if (!handlers.TryGetValue(commandType, out var handler))
+                return Result.Fail("command.handler_missing", commandType.FullName);
 
-            if (!handlers.TryGetValue(command.GetType(), out var commandHandlers))
-                throw new InvalidOperationException(
-                    $"No command handler is registered for {command.GetType().FullName}.");
-
-            foreach (var handler in commandHandlers.ToArray())
-                handler(command);
+            return handler(envelope);
         }
     }
 
     public interface ICommandTransport
     {
         void Send(ICommand command);
+        void Send(PlayerId issuer, ICommand command);
     }
 
-    public sealed class LocalCommandTransport : ICommandTransport
+    internal interface ICommandQueue
     {
-        private readonly ICommandDispatcher dispatcher;
+        void BeginTick(long tick);
+        IReadOnlyList<CommandEnvelope> Drain(long tick);
+    }
 
-        public LocalCommandTransport(ICommandDispatcher dispatcher)
+    public sealed class LocalCommandTransport : ICommandTransport, ICommandQueue
+    {
+        private readonly List<CommandEnvelope> pending = new List<CommandEnvelope>();
+        private long currentTick;
+        private long sequence;
+
+        public void Send(ICommand command) => Send(PlayerId.None, command);
+
+        public void Send(PlayerId issuer, ICommand command)
         {
-            this.dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+
+            pending.Add(new CommandEnvelope(issuer, currentTick + 1, sequence++, command));
         }
 
-        public void Send(ICommand command)
+        void ICommandQueue.BeginTick(long tick) => currentTick = tick;
+
+        IReadOnlyList<CommandEnvelope> ICommandQueue.Drain(long tick)
         {
-            dispatcher.Dispatch(command);
+            var result = new List<CommandEnvelope>();
+            for (var index = pending.Count - 1; index >= 0; index--)
+            {
+                if (pending[index].Tick != tick)
+                    continue;
+
+                result.Add(pending[index]);
+                pending.RemoveAt(index);
+            }
+
+            result.Sort((left, right) => left.Sequence.CompareTo(right.Sequence));
+            return result;
         }
     }
 }

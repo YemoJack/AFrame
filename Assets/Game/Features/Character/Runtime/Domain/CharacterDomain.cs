@@ -36,7 +36,6 @@ namespace AFrame.Game.Character
         private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();
 
         private readonly CharacterState state;
-        private IClock clock;
         private IEventPublisher events;
 
         public CharacterModule(float speed)
@@ -45,6 +44,7 @@ namespace AFrame.Game.Character
         }
 
         public ModuleId Id => new ModuleId("game.character");
+        public ModuleScope Scope => ModuleScope.Session;
         public IReadOnlyList<ModuleId> Dependencies => NoDependencies;
 
         public void Configure(IModuleBuilder builder)
@@ -55,21 +55,20 @@ namespace AFrame.Game.Character
 
         public void Start(ModuleContext context)
         {
-            clock = context.Clock;
             events = context.Get<IEventPublisher>();
+            state.SetTickDeltaTime(context.TickDeltaTime);
         }
 
         public void Stop()
         {
-            clock = null;
             events = null;
         }
 
-        public void Handle(MoveCharacterCommand command)
+        public Result Handle(in CommandEnvelope envelope, in MoveCharacterCommand command)
         {
-            var deltaTime = clock == null ? 0d : clock.DeltaTime;
-            state.Position += command.Direction * (state.Speed * (float)deltaTime);
+            state.Position += command.Direction * (state.Speed * state.TickDeltaTime);
             events?.Publish(new CharacterMovedEvent(state.Position));
+            return Result.Ok();
         }
 
         private sealed class CharacterState : ICharacterState
@@ -81,6 +80,12 @@ namespace AFrame.Game.Character
 
             public Float3 Position { get; set; }
             public float Speed { get; }
+            public float TickDeltaTime { get; private set; }
+
+            public void SetTickDeltaTime(float value)
+            {
+                TickDeltaTime = value;
+            }
         }
     }
 }

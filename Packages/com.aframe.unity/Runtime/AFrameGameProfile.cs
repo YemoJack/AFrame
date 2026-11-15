@@ -9,10 +9,15 @@ namespace AFrame.Unity
     public sealed class AFrameGameProfile : ScriptableObject
     {
         [SerializeField] private string profileId = "default";
+        [SerializeField, Min(1f)] private float tickRate = 50f;
+        [SerializeField, Min(1)] private int maxTicksPerFrame = 4;
         [SerializeField] private List<AFrameModuleAsset> modules =
             new List<AFrameModuleAsset>();
 
         public string ProfileId => profileId;
+        public float TickRate => tickRate;
+        public float TickDeltaTime => 1f / Mathf.Max(1f, tickRate);
+        public int MaxTicksPerFrame => Mathf.Max(1, maxTicksPerFrame);
         public IReadOnlyList<AFrameModuleAsset> Modules => modules;
 
         public void Configure(string id, IEnumerable<AFrameModuleAsset> moduleAssets)

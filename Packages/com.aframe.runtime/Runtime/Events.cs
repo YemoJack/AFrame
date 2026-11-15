@@ -8,13 +8,18 @@ namespace AFrame.Runtime
     public interface IEventStream
     {
         IDisposable Subscribe<TEvent>(Action<TEvent> handler) where TEvent : IDomainEvent;
+    }
+
+    public interface IEventPublisher
+    {
         void Publish<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent;
     }
 
-    public sealed class EventStream : IEventStream
+    public sealed class EventStream : IEventStream, IEventPublisher
     {
         private readonly Dictionary<Type, List<Delegate>> subscribers =
             new Dictionary<Type, List<Delegate>>();
+        private readonly Queue<Action> pending = new Queue<Action>();
 
         public IDisposable Subscribe<TEvent>(Action<TEvent> handler) where TEvent : IDomainEvent
         {
@@ -34,6 +39,23 @@ namespace AFrame.Runtime
 
         public void Publish<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
         {
+            pending.Enqueue(() => Dispatch(domainEvent));
+        }
+
+        public void Flush(int maxEvents = 4096)
+        {
+            var processed = 0;
+            while (pending.Count > 0)
+            {
+                if (++processed > maxEvents)
+                    throw new InvalidOperationException("The event queue exceeded its safety limit.");
+
+                pending.Dequeue()();
+            }
+        }
+
+        private void Dispatch<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
+        {
             if (!subscribers.TryGetValue(typeof(TEvent), out var eventSubscribers))
                 return;
 
@@ -45,10 +67,7 @@ namespace AFrame.Runtime
         {
             private Action dispose;
 
-            public Subscription(Action dispose)
-            {
-                this.dispose = dispose;
-            }
+            public Subscription(Action dispose) => this.dispose = dispose;
 
             public void Dispose()
             {

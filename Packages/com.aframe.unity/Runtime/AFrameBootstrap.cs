@@ -11,6 +11,7 @@ namespace AFrame.Unity
         [SerializeField] private bool startOnAwake = true;
 
         private GameModuleHost host;
+        private double accumulator;
 
         public AFrameGameProfile Profile => profile;
         public ModuleContext Context => host == null ? null : host.Context;
@@ -26,8 +27,28 @@ namespace AFrame.Unity
 
         private void Awake()
         {
+            DontDestroyOnLoad(gameObject);
             if (startOnAwake)
                 StartGame();
+        }
+
+        private void Update()
+        {
+            if (!IsRunning || profile == null)
+                return;
+
+            accumulator += Time.deltaTime;
+            var tickDelta = profile.TickDeltaTime;
+            var ticks = 0;
+            while (accumulator >= tickDelta && ticks < profile.MaxTicksPerFrame)
+            {
+                accumulator -= tickDelta;
+                host.Tick();
+                ticks++;
+            }
+
+            if (ticks == profile.MaxTicksPerFrame && accumulator > tickDelta)
+                accumulator = tickDelta;
         }
 
         public void StartGame()
@@ -44,7 +65,8 @@ namespace AFrame.Unity
             host = new GameModuleHost();
             try
             {
-                host.Start(profile.CreateModules(), new UnityClock());
+                accumulator = 0d;
+                host.Start(profile.CreateModules(), new UnityClock(), profile.TickDeltaTime);
             }
             catch
             {
@@ -61,6 +83,7 @@ namespace AFrame.Unity
 
             host.Stop();
             host = null;
+            accumulator = 0d;
         }
 
         private void OnDestroy()

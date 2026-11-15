@@ -44,7 +44,7 @@ namespace AFrame.Editor
 
             WriteIfMissing(
                 $"{runtimeRoot}/Application/{typeName}Module.cs",
-                $"using System;\nusing System.Collections.Generic;\nusing AFrame.Foundation;\nusing AFrame.Runtime;\n\nnamespace AFrame.Game.{typeName}\n{{\n    public sealed class {typeName}Module : IGameModule\n    {{\n        private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();\n\n        public ModuleId Id => new ModuleId(\"game.{ToKebabCase(typeName)}\");\n        public IReadOnlyList<ModuleId> Dependencies => NoDependencies;\n\n        public void Configure(IModuleBuilder builder) {{ }}\n        public void Start(ModuleContext context) {{ }}\n        public void Stop() {{ }}\n    }}\n}}\n");
+                $"using System;\nusing System.Collections.Generic;\nusing AFrame.Foundation;\nusing AFrame.Runtime;\n\nnamespace AFrame.Game.{typeName}\n{{\n    public sealed class {typeName}Module : IGameModule\n    {{\n        private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();\n\n        public ModuleId Id => new ModuleId(\"game.{ToKebabCase(typeName)}\");\n        public ModuleScope Scope => ModuleScope.Session;\n        public IReadOnlyList<ModuleId> Dependencies => NoDependencies;\n\n        public void Configure(IModuleBuilder builder) {{ }}\n        public void Start(ModuleContext context) {{ }}\n        public void Stop() {{ }}\n    }}\n}}\n");
 
             WriteIfMissing(
                 $"{root}/Docs/{typeName}.md",
