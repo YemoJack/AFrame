@@ -12,6 +12,20 @@ namespace AFrame.Game.Exit
     [StableId("exit.station_timed_out")]
     public readonly struct StationTimedOut : IDomainEvent { }
 
+    public readonly struct StationProgress
+    {
+        public StationProgress(double secondsRemaining, bool cleared, bool timedOut)
+        {
+            SecondsRemaining = secondsRemaining;
+            Cleared = cleared;
+            TimedOut = timedOut;
+        }
+
+        public double SecondsRemaining { get; }
+        public bool Cleared { get; }
+        public bool TimedOut { get; }
+    }
+
     public interface IStationExitQuery : IQuery
     {
         bool IsUnlocked { get; }

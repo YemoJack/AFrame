@@ -1,0 +1,89 @@
+[
+  {
+    "path": "Assets/Game/Features/Character/feature.json",
+    "definition": {
+      "id": "character",
+      "version": "0.2.0",
+      "summary": "平面角色移动",
+      "physicsAuthority": "domain",
+      "supports": {
+        "dimensions": [
+          "2d",
+          "3d"
+        ],
+        "network": [
+          "offline"
+        ]
+      }
+    },
+    "assemblies": [
+      "AFrame.Game.Character.Contracts",
+      "AFrame.Game.Character.Core",
+      "AFrame.Game.Character.Tests",
+      "AFrame.Game.Character.Unity"
+    ]
+  },
+  {
+    "path": "Assets/Game/Features/Exit/feature.json",
+    "definition": {
+      "id": "exit",
+      "version": "0.1.0",
+      "summary": "集齐能源核心后解锁出口并判定通关。",
+      "physicsAuthority": "none",
+      "supports": {
+        "dimensions": [
+          "3d"
+        ],
+        "network": [
+          "offline"
+        ]
+      }
+    },
+    "assemblies": [
+      "AFrame.Game.Exit.Contracts",
+      "AFrame.Game.Exit.Core"
+    ]
+  },
+  {
+    "path": "Assets/Game/Features/Inventory/feature.json",
+    "definition": {
+      "id": "inventory",
+      "version": "0.1.0",
+      "summary": "记录唯一的能源核心与收集进度。",
+      "physicsAuthority": "none",
+      "supports": {
+        "dimensions": [
+          "3d"
+        ],
+        "network": [
+          "offline"
+        ]
+      }
+    },
+    "assemblies": [
+      "AFrame.Game.Inventory.Contracts",
+      "AFrame.Game.Inventory.Core"
+    ]
+  },
+  {
+    "path": "Assets/Game/Features/Pickup/feature.json",
+    "definition": {
+      "id": "pickup",
+      "version": "0.1.0",
+      "summary": "把触发区交互转换为拾取命令。",
+      "physicsAuthority": "none",
+      "supports": {
+        "dimensions": [
+          "3d"
+        ],
+        "network": [
+          "offline"
+        ]
+      }
+    },
+    "assemblies": [
+      "AFrame.Game.Pickup.Contracts",
+      "AFrame.Game.Pickup.Core"
+    ]
+  }
+]

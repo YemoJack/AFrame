@@ -1,0 +1,11 @@
+{
+  "id": "v22-first-release",
+  "goal": "Finish the remaining AFrame v2.2 first-release architecture and acceptance entry points.",
+  "allowedPaths": [
+    "Assets/Game/**", "Packages/com.aframe.*/**", "Packages/packages-lock.json",
+    "ProjectSettings/EditorBuildSettings.asset", "Context/**",
+    "Tools/aframe", "README.md", "Docs/AFrame-Architecture-v2.2.md", "Docs/AFrame-v2.2-Acceptance.md",
+    "Tasks/v22-first-release.task.json"
+  ],
+  "acceptance": ["AFrame.Tests.*", "AFrame.Game.Character.Tests.*"]
+}

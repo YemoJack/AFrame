@@ -11,6 +11,7 @@ namespace AFrame.Unity
 
         public ModuleId Id => new ModuleId(moduleId);
         public string IdString => moduleId;
+        public virtual ModuleScope Scope => ModuleScope.Session;
         public abstract IReadOnlyList<ModuleId> Dependencies { get; }
         public abstract IGameModule CreateModule();
 

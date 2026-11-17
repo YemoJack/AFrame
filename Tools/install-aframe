@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import shutil
+import stat
+import tempfile
+from pathlib import Path
+
+
+CORE_PACKAGES = tuple(
+    f"com.aframe.{part}" for part in ("foundation", "runtime", "data", "unity", "editor")
+)
+
+
+def package_files(directory):
+    return {
+        path.relative_to(directory): path.read_bytes()
+        for path in directory.rglob("*")
+        if path.is_file() and path.name != ".DS_Store"
+    }
+
+
+def install(project, with_sample=False):
+    packages = project / "Packages"
+    manifest_path = packages / "manifest.json"
+    if not (project / "ProjectSettings/ProjectVersion.txt").is_file() or not manifest_path.is_file():
+        raise ValueError("Pass the Unity project root containing Packages/manifest.json and ProjectSettings.")
+
+    if (project / "Temp/UnityLockfile").exists():
+        raise ValueError("Close the target Unity Editor before installation.")
+    repository = Path(__file__).resolve().parent.parent
+    source = repository / "Packages"
+    names = CORE_PACKAGES + (("com.aframe.save",) if with_sample else ())
+    tool = project / "Tools/aframe"
+    launcher = repository / "Tools/aframe"
+    if tool.is_symlink() or tool.exists() and (not tool.is_file() or tool.read_bytes() != launcher.read_bytes()):
+        raise ValueError(f"Command is already in use: {tool}")
+    sample_source = repository / "Assets/Game"
+    sample = project / "Assets/Game"
+    if with_sample and (sample.is_symlink() or sample.exists() and (
+        not sample.is_dir() or package_files(sample_source) != package_files(sample)
+    )):
+        raise ValueError("The sample needs an unused or identical Assets/Game directory.")
+    original = manifest_path.read_bytes()
+    manifest = json.loads(original)
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("dependencies"), dict):
+        raise ValueError("Packages/manifest.json must contain a dependencies object.")
+
+    dependencies = manifest["dependencies"]
+    previous_dependencies = dependencies.copy()
+    pending = []
+    for name in names:
+        source_dir = source / name
+        if not (source_dir / "package.json").is_file():
+            raise ValueError(f"Source package is missing: {source_dir}")
+
+        target = packages / name
+        entry = f"file:{name}"
+        if name in dependencies and dependencies[name] != entry:
+            raise ValueError(f"{name} already has a different entry in Packages/manifest.json.")
+        if target.is_symlink() or (target.exists() and not target.is_dir()):
+            raise ValueError(f"Package path is already in use: {target}")
+        if target.is_dir():
+            if package_files(source_dir) != package_files(target):
+                raise ValueError(f"Package already exists with different files: {target}")
+        else:
+            pending.append(name)
+        dependencies[name] = entry
+
+    dependencies.setdefault("com.unity.modules.jsonserialize", "1.0.0")
+    dependencies.setdefault("com.unity.nuget.newtonsoft-json", "3.2.1")
+    if with_sample:
+        for name, version in {"com.unity.inputsystem": "1.20.1", "com.unity.modules.physics": "1.0.0",
+                              "com.unity.modules.imgui": "1.0.0"}.items():
+            dependencies.setdefault(name, version)
+    copy_tool = not tool.exists()
+    copy_sample = with_sample and not sample.exists()
+    if not pending and not copy_tool and not copy_sample and dependencies == previous_dependencies:
+        print(f"AFrame is already installed in {project}.")
+        return
+
+    # Prepare everything before exposing any of the packages to Unity.
+    with tempfile.TemporaryDirectory(prefix=".aframe-install-", dir=project) as temporary:
+        staging = Path(temporary)
+        for name in pending:
+            shutil.copytree(source / name, staging / name, ignore=shutil.ignore_patterns(".DS_Store"))
+        if copy_tool:
+            shutil.copy2(launcher, staging / "aframe")
+        if copy_sample:
+            shutil.copytree(sample_source, staging / "Game", ignore=shutil.ignore_patterns(".DS_Store"))
+            shutil.copy2(repository / "Assets/Game.meta", staging / "Game.meta")
+        staged_manifest = staging / "manifest.json"
+        if dependencies != previous_dependencies:
+            staged_manifest.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            staged_manifest.chmod(stat.S_IMODE(manifest_path.stat().st_mode))
+
+        installed = []
+        try:
+            if manifest_path.read_bytes() != original:
+                raise ValueError("Packages/manifest.json changed during installation. Try again.")
+            for name in pending:
+                target = packages / name
+                if target.exists() or target.is_symlink():
+                    raise ValueError(f"Package path appeared during installation: {target}")
+                (staging / name).rename(target)
+                installed.append((target, staging / name))
+            entries = []
+            if copy_tool:
+                entries.append((staging / "aframe", tool))
+            if copy_sample:
+                entries.extend(((staging / "Game", sample), (staging / "Game.meta", sample.with_suffix(".meta"))))
+            for staged_path, target in entries:
+                if target.exists() or target.is_symlink():
+                    raise ValueError(f"Installation path appeared: {target}")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                staged_path.rename(target)
+                installed.append((target, staged_path))
+            if staged_manifest.exists():
+                staged_manifest.replace(manifest_path)
+        except (OSError, ValueError):
+            for target, staged_path in reversed(installed):
+                target.rename(staged_path)
+            raise
+
+    print(f"AFrame installed in {project}. Open the project in Unity to import the packages.")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Install the AFrame framework into an existing Unity project.")
+    parser.add_argument("project", type=Path, help="Path to the target Unity project root")
+    parser.add_argument("--sample", action="store_true", help="Copy the Energy Station sample into an unused Assets/Game directory")
+    args = parser.parse_args()
+    try:
+        install(args.project.expanduser().resolve(), args.sample)
+    except (OSError, ValueError) as error:
+        parser.exit(1, f"AFrame install failed: {error}\n")

@@ -12,7 +12,11 @@ namespace AFrame.Game.Pickup
         public ModuleScope Scope => ModuleScope.Session;
         public IReadOnlyList<ModuleId> Dependencies => new[] { new ModuleId("game.inventory") };
 
-        public void Configure(IModuleBuilder builder) => builder.AddCommandHandler(handler);
+        public void Configure(IModuleBuilder builder)
+        {
+            builder.Require<ICommandSink>();
+            builder.AddCommandHandler(handler);
+        }
         public void Start(ModuleContext context) => handler.Commands = context.Get<ICommandSink>();
         public void Stop() => handler.Commands = null;
 

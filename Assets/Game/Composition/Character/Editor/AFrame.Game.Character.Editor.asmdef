@@ -1,0 +1,5 @@
+{
+  "name": "AFrame.Game.Character.Editor",
+  "references": ["AFrame.Unity", "AFrame.Game.Character.Unity", "AFrame.Game.Character.Composition"],
+  "includePlatforms": ["Editor"]
+}

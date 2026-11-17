@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using AFrame.Foundation;
 using AFrame.Game.Character;
@@ -9,11 +10,13 @@ using AFrame.Runtime;
 using AFrame.Unity;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 namespace AFrame.Game.EnergyStation
 {
-    public sealed class EnergyStationScene : MonoBehaviour
+    public sealed class EnergyStationScene : AFrameSceneEntry, IAFrameSmokeScenario
     {
+        [SerializeField] private Material stationMaterial;
         [SerializeField, Min(0.02f)] private float timeLimitSeconds = 45f;
         [SerializeField] private Vector3[] coreLocations =
         {
@@ -22,9 +25,13 @@ namespace AFrame.Game.EnergyStation
             new Vector3(-3.3f, 0f, 2.6f)
         };
 
-        private readonly List<AFrameModuleAsset> modules = new List<AFrameModuleAsset>();
+        private readonly Float3 movementBounds = new Float3(5.65f, 0, 4.4f);
+        private StationSave saves;
+        private string status;
+        private Exception smokeFailure;
+        public bool SmokeComplete { get; private set; }
+        private CharacterView characterView;
         private Transform runRoot;
-        private AFrameGameProfile profile;
         private AFrameBootstrap bootstrap;
         private IInventoryQuery inventory;
         private IStationExitQuery exit;
@@ -40,82 +47,181 @@ namespace AFrame.Game.EnergyStation
         private GUIStyle titleStyle;
         private GUIStyle statusStyle;
 
-        private void Awake()
+        public override IReadOnlyList<string> Features => new[] { "character", "inventory", "pickup", "exit" };
+        public override GameDimension? DimensionOverride => GameDimension.ThreeD;
+
+        public override void Enter(AFrameBootstrap host)
         {
             if (coreLocations == null || coreLocations.Length == 0)
                 throw new InvalidOperationException("The Energy Station needs at least one core location.");
-
-            BeginRun();
+            bootstrap = host;
+            saves = new StationSave(Path.Combine(Application.persistentDataPath, "AFrame", "energy-station.json"),
+                movementBounds, coreLocations.Length, timeLimitSeconds);
         }
+
+        public override void SampleInput() => input?.Sample();
 
         private void Update()
         {
-            var keyboard = Keyboard.current;
-            if (keyboard != null && keyboard.rKey.wasPressedThisFrame)
-            {
-                EndRun();
-                BeginRun();
-            }
-
-            if (bootstrap == null || !bootstrap.isActiveAndEnabled)
+            if (bootstrap == null)
                 return;
 
+            var keyboard = Keyboard.current;
+            if (inventory == null || bootstrap.Context == null)
+            {
+                if (keyboard != null && keyboard.lKey.wasPressedThisFrame && saves.Exists)
+                    Load();
+                else if (keyboard != null && keyboard.enterKey.wasPressedThisFrame)
+                    BeginRun();
+                return;
+            }
+
+            if (keyboard != null && keyboard.f5Key.wasPressedThisFrame)
+                Save();
+            if (keyboard != null && keyboard.rKey.wasPressedThisFrame)
+            {
+                BeginRun();
+                return;
+            }
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && !exit.IsCleared && !exit.HasTimedOut)
+            {
+                if (bootstrap.SessionState == HostState.Paused)
+                    bootstrap.ResumeSession();
+                else
+                    bootstrap.PauseSession();
+            }
+            if (!bootstrap.IsRunning)
+                return;
             foreach (var crystal in crystals)
                 crystal.Rotate(Vector3.up, 55f * Time.deltaTime, Space.World);
         }
 
-        private void BeginRun()
+        private void BeginRun(Action<ModuleContext> restore = null)
         {
+            EndRun();
+            status = null;
             exitRequested = false;
-            var root = new GameObject("Station Run");
-            runRoot = root.transform;
+            runRoot = new GameObject("Station Run").transform;
             runRoot.SetParent(transform, false);
-
-            StartSession();
-            CreateRoom();
-            var player = CreatePlayer();
-            CreateCores(player);
-            CreateExit(player);
-            CreateCameraAndLight();
-
-            coreSubscription = bootstrap.Context.Events.Subscribe<EnergyCoreStored>(OnCoreStored);
-            clearedSubscription = bootstrap.Context.Events.Subscribe<StationCleared>(_ => FinishRun());
-            timedOutSubscription = bootstrap.Context.Events.Subscribe<StationTimedOut>(_ =>
+            try
             {
-                gate.SetActive(true);
-                FinishRun();
-            });
+                CreateRoom();
+                var player = CreatePlayer();
+                bootstrap.BeginSession(new IGameModule[]
+                {
+                    new CharacterInputModule(input),
+                    new CharacterModule("character.default", movementBounds),
+                    new InventoryModule(coreLocations.Length),
+                    new PickupModule(),
+                    new ExitModule(timeLimitSeconds)
+                }, restore);
+                bootstrap.BindView(characterView);
+                inventory = bootstrap.Context.Get<IInventoryQuery>();
+                exit = bootstrap.Context.Get<IStationExitQuery>();
+                commands = bootstrap.Context.Get<ICommandSink>();
+                CreateCores(player);
+                CreateExit(player);
+                CreateCameraAndLight();
+
+                var events = bootstrap.Context.Get<IViewEventStream>();
+                coreSubscription = events.Subscribe<EnergyCoreStored>(OnCoreStored);
+                clearedSubscription = events.Subscribe<StationCleared>(_ => FinishRun());
+                timedOutSubscription = events.Subscribe<StationTimedOut>(_ => FinishRun());
+
+                for (var id = 0; id < coreObjects.Length; id++)
+                    coreObjects[id].SetActive(!inventory.Contains(id));
+                gate.SetActive(!exit.IsUnlocked);
+                if (exit.IsCleared || exit.HasTimedOut)
+                    FinishRun();
+            }
+            catch (Exception error)
+            {
+                EndRun();
+                status = error.Message;
+                Debug.LogException(error, this);
+            }
         }
 
-        private void StartSession()
+        private void Load()
         {
-            var character = ScriptableObject.CreateInstance<CharacterModuleAsset>();
-            character.SetDefaults();
-            character.SetMovementBounds(new Vector2(5.65f, 4.4f));
-            modules.Add(character);
-            AddModule(new InventoryModule(coreLocations.Length));
-            AddModule(new PickupModule());
-            AddModule(new ExitModule(timeLimitSeconds));
-
-            profile = ScriptableObject.CreateInstance<AFrameGameProfile>();
-            profile.Configure("energy-station", modules);
-
-            var root = new GameObject("Energy Station Bootstrap");
-            root.SetActive(false);
-            bootstrap = root.AddComponent<AFrameBootstrap>();
-            bootstrap.SetProfile(profile);
-            root.SetActive(true);
-
-            inventory = bootstrap.Context.Get<IInventoryQuery>();
-            exit = bootstrap.Context.Get<IStationExitQuery>();
-            commands = bootstrap.Context.Get<ICommandSink>();
+            try { BeginRun(saves.Read()); }
+            catch (Exception error) { status = $"读取失败。{error.Message}"; }
         }
 
-        private void AddModule(IGameModule module)
+        private void Save()
         {
-            var asset = ScriptableObject.CreateInstance<StationModuleAsset>();
-            asset.Initialize(module);
-            modules.Add(asset);
+            status = "正在保存";
+            // With the simulation paused, the last completed Tick is already a stable boundary.
+            void Write()
+            {
+                try { saves.Save(bootstrap.Context); status = "已保存"; }
+                catch (Exception error) { status = $"保存失败。{error.Message}"; }
+            }
+            if (bootstrap.IsRunning)
+                bootstrap.AtTickBoundary(Write);
+            else
+                Write();
+        }
+
+        public void BeginSmoke()
+        {
+            BeginRun();
+            if (bootstrap?.Context == null)
+                throw new InvalidOperationException("The station did not start.");
+            commands.Submit(PlayerId.None, new SetCharacterMovement(new Float3(1, 0, 0)));
+            for (var id = 0; id < coreLocations.Length; id++)
+                commands.Submit(PlayerId.None, new CollectEnergyCore(id));
+            bootstrap.AtTickBoundary(() => bootstrap.AtTickBoundary(SmokeSaveAndRestart));
+        }
+
+        private void SmokeSaveAndRestart()
+        {
+            var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".json");
+            try
+            {
+                var source = bootstrap.Context;
+                var before = source.Get<ICharacterState>().Position;
+                var remaining = exit.SecondsRemaining;
+                var appDefinitions = bootstrap.GetAppService<ICharacterDefinitions>();
+                var expectedX = Math.Min(movementBounds.x,
+                    appDefinitions.Get("character.default").speed * source.TickDeltaTime * source.Tick);
+                if (inventory.Collected != coreLocations.Length || Math.Abs(before.x - expectedX) > 0.0001f || !exit.IsUnlocked)
+                    throw new InvalidOperationException("Definition-driven movement, pickup or exit unlock did not advance.");
+
+                var slot = new StationSave(path, movementBounds, coreLocations.Length, timeLimitSeconds);
+                slot.Save(source);
+                BeginRun(slot.Read());
+                if (bootstrap.Context == null || ReferenceEquals(source, bootstrap.Context)
+                    || bootstrap.GetAppService<ICharacterDefinitions>() != appDefinitions
+                    || !bootstrap.Context.Get<ICharacterState>().Position.Equals(before)
+                    || inventory.Collected != coreLocations.Length || exit.SecondsRemaining != remaining)
+                    throw new InvalidOperationException("A new session did not restore the saved run.");
+
+                bootstrap.PauseSession();
+                commands.Submit(PlayerId.None, new ReachStationExit());
+                if (exit.IsCleared || bootstrap.SessionState != HostState.Paused)
+                    throw new InvalidOperationException("Pause did not keep the command queued.");
+                bootstrap.ResumeSession();
+                bootstrap.AtTickBoundary(() => SmokeComplete = true);
+            }
+            catch (Exception error)
+            {
+                smokeFailure = error;
+                SmokeComplete = true;
+            }
+            finally
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+        }
+
+        public void VerifySmoke()
+        {
+            if (smokeFailure != null)
+                throw smokeFailure;
+            if (!exit.IsCleared || bootstrap.SessionState != HostState.Paused)
+                throw new InvalidOperationException("The restored run did not clear after resuming.");
         }
 
         private Collider CreatePlayer()
@@ -128,11 +234,8 @@ namespace AFrame.Game.EnergyStation
             collider.center = Vector3.up * 0.7f;
             var body = player.AddComponent<Rigidbody>();
             body.isKinematic = true;
-            var view = player.AddComponent<CharacterView>();
-            view.SetBootstrap(bootstrap);
+            characterView = player.AddComponent<CharacterView>();
             input = player.AddComponent<CharacterInputAdapter>();
-            input.SetBootstrap(bootstrap);
-            input.EnableSprint();
 
             Shape("Suit", PrimitiveType.Capsule, Vector3.up * 0.7f,
                 new Vector3(0.74f, 0.7f, 0.74f), new Color(0.34f, 0.87f, 1f), player.transform);
@@ -165,7 +268,7 @@ namespace AFrame.Game.EnergyStation
                 var requested = false;
                 root.AddComponent<StationTrigger>().Bind(player, () =>
                 {
-                    if (requested || inventory.Contains(coreId))
+                    if (!bootstrap.IsRunning || requested || inventory.Contains(coreId))
                         return;
                     requested = true;
                     commands.Submit(PlayerId.None, new CollectEnergyCore(coreId));
@@ -190,7 +293,7 @@ namespace AFrame.Game.EnergyStation
             trigger.isTrigger = true;
             zone.AddComponent<StationTrigger>().Bind(player, () =>
             {
-                if (exitRequested || !exit.IsUnlocked)
+                if (!bootstrap.IsRunning || exitRequested || !exit.IsUnlocked)
                     return;
                 exitRequested = true;
                 commands.Submit(PlayerId.None, new ReachStationExit());
@@ -258,14 +361,27 @@ namespace AFrame.Game.EnergyStation
             var properties = new MaterialPropertyBlock();
             properties.SetColor("_BaseColor", color);
             properties.SetColor("_Color", color);
-            shape.GetComponent<Renderer>().SetPropertyBlock(properties);
+            var renderer = shape.GetComponent<Renderer>();
+            if (stationMaterial != null && GraphicsSettings.currentRenderPipeline != null)
+                renderer.sharedMaterial = stationMaterial;
+            renderer.SetPropertyBlock(properties);
             return shape;
         }
 
         private void OnGUI()
         {
-            if (inventory == null || exit == null)
+            if (bootstrap == null)
                 return;
+            if (inventory == null || exit == null || bootstrap.Context == null)
+            {
+                GUILayout.BeginArea(new Rect((Screen.width - 240f) * 0.5f, Screen.height * 0.3f, 240f, 220f), GUI.skin.box);
+                GUILayout.Label("能源回收站");
+                if (GUILayout.Button("开始 [Enter]")) BeginRun();
+                if (saves.Exists && GUILayout.Button("读取存档 [L]")) Load();
+                if (!string.IsNullOrEmpty(status)) GUILayout.Label(status);
+                GUILayout.EndArea();
+                return;
+            }
 
             if (titleStyle == null)
             {
@@ -288,20 +404,36 @@ namespace AFrame.Game.EnergyStation
             GUI.Label(new Rect(panel.x, panel.y + 5f, width, 32f), headline, titleStyle);
             GUI.contentColor = textColor;
 
-            var status = exit.IsCleared ? $"Escaped with {seconds}s remaining"
+            var hint = exit.IsCleared ? $"Escaped with {seconds}s remaining"
                 : exit.HasTimedOut ? $"{inventory.Collected} / {inventory.Total} cores recovered"
                 : exit.IsUnlocked ? "Exit open  ·  Reach the green pad" : "Collect the cores before time runs out";
-            GUI.Label(new Rect(panel.x, panel.y + 40f, width, 21f), status, statusStyle);
+            GUI.Label(new Rect(panel.x, panel.y + 40f, width, 21f), hint, statusStyle);
 
             var controls = exit.IsCleared || exit.HasTimedOut ? "R to restart" : "WASD / Arrows  ·  Shift to sprint  ·  R to restart";
             GUI.Label(new Rect(panel.x, panel.y + 65f, width, 20f), controls, statusStyle);
+            GUILayout.BeginArea(new Rect(panel.x, panel.yMax + 8f, width, 65f));
+            GUILayout.BeginHorizontal();
+            if (!exit.IsCleared && !exit.HasTimedOut)
+            {
+                if (bootstrap.IsRunning)
+                {
+                    if (GUILayout.Button("暂停")) bootstrap.PauseSession();
+                }
+                else if (GUILayout.Button("继续"))
+                    bootstrap.ResumeSession();
+            }
+            if (GUILayout.Button("保存 [F5]")) Save();
+            if (GUILayout.Button("重开")) BeginRun();
+            if (GUILayout.Button("返回菜单")) EndRun();
+            GUILayout.EndHorizontal();
+            if (!string.IsNullOrEmpty(status)) GUILayout.Label(status);
+            GUILayout.EndArea();
         }
 
         private void FinishRun()
         {
             // Keep query state available for the final HUD and stop advancing the session.
-            bootstrap.enabled = false;
-            input.enabled = false;
+            bootstrap.PauseSession();
         }
 
         private void EndRun()
@@ -310,23 +442,21 @@ namespace AFrame.Game.EnergyStation
             clearedSubscription?.Dispose();
             timedOutSubscription?.Dispose();
 
+            coreSubscription = clearedSubscription = timedOutSubscription = null;
+            if (inventory != null || characterView != null)
+                bootstrap?.EndSession();
             if (runRoot != null)
             {
                 runRoot.gameObject.SetActive(false);
                 Destroy(runRoot.gameObject);
             }
-            if (bootstrap != null)
-            {
-                bootstrap.StopGame();
-                bootstrap.gameObject.SetActive(false);
-                Destroy(bootstrap.gameObject);
-            }
-
-            foreach (var module in modules)
-                Destroy(module);
-            modules.Clear();
-            if (profile != null)
-                Destroy(profile);
+            runRoot = null;
+            inventory = null;
+            exit = null;
+            commands = null;
+            input = null;
+            characterView = null;
+            status = null;
         }
 
         private void OnDestroy() => EndRun();

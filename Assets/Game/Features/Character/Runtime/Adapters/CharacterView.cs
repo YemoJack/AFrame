@@ -1,42 +1,34 @@
-using System;
-using AFrame.Foundation;
 using AFrame.Unity;
 using UnityEngine;
 
 namespace AFrame.Game.Character
 {
-    public sealed class CharacterView : MonoBehaviour
+    public sealed class CharacterView : AFrameView
     {
-        [SerializeField] private AFrameBootstrap bootstrap;
-        private IDisposable subscription;
+        [SerializeField] private GameDimension dimension;
+        private ICharacterState query;
+        private Vector3 previous;
+        private Vector3 current;
 
-        public void SetBootstrap(AFrameBootstrap value)
+        public override void Bind(IViewContext context)
         {
-            bootstrap = value;
+            query = context.Query<ICharacterState>();
+            OnTickCompleted();
+            previous = current;
+            transform.position = current;
         }
 
-        private void Start()
-        {
-            if (bootstrap == null || !bootstrap.IsRunning)
-                return;
+        public override void Unbind() => query = null;
 
-            subscription = bootstrap.Context.Events.Subscribe<CharacterMovedEvent>(OnCharacterMoved);
-            ApplyPosition(bootstrap.Context.Get<ICharacterState>().Position);
+        public override void OnTickCompleted()
+        {
+            previous = current;
+            var position = query.Position;
+            current = dimension == GameDimension.TwoD
+                ? new Vector3(position.x, position.z, 0f)
+                : new Vector3(position.x, 0f, position.z);
         }
 
-        private void OnDestroy()
-        {
-            subscription?.Dispose();
-        }
-
-        private void OnCharacterMoved(CharacterMovedEvent domainEvent)
-        {
-            ApplyPosition(domainEvent.Position);
-        }
-
-        private void ApplyPosition(Float3 position)
-        {
-            transform.position = new Vector3(position.x, position.y, position.z);
-        }
+        public override void OnRender(float alpha) => transform.position = Vector3.Lerp(previous, current, alpha);
     }
 }

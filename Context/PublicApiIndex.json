@@ -1,0 +1,1270 @@
+[
+  {
+    "assembly": "AFrame.Data",
+    "path": "Packages/com.aframe.data/Runtime/AFrame.Data.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Data.DefinitionDocument",
+        "members": [
+          "System.Int32 schemaVersion",
+          "System.String id",
+          "System.String type",
+          "Void .ctor()"
+        ]
+      },
+      {
+        "name": "AFrame.Data.DefinitionTypeAttribute",
+        "members": [
+          "System.String Id",
+          "System.String get_Id()",
+          "Void .ctor(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Data.FeatureManifest",
+        "members": [
+          "System.String entryPoint",
+          "System.String id",
+          "System.String version",
+          "System.String[] acceptanceChecks",
+          "System.String[] definitionSources",
+          "System.String[] dependencies",
+          "System.String[] sourceRoots",
+          "Void .ctor()"
+        ]
+      },
+      {
+        "name": "AFrame.Data.IDefinition",
+        "members": [
+          "Void Validate()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Data.Unity",
+    "path": "Packages/com.aframe.data/Runtime/Unity/AFrame.Data.Unity.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Data.AFrameDefinitionAsset",
+        "members": [
+          "Boolean IsCurrent(System.String)",
+          "Int32 SchemaVersion",
+          "Int32 get_SchemaVersion()",
+          "System.String DefinitionId",
+          "System.String DefinitionType",
+          "System.String GeneratorVersion",
+          "System.String SourceHash",
+          "System.String SourceJson",
+          "System.String SourcePath",
+          "System.String get_DefinitionId()",
+          "System.String get_DefinitionType()",
+          "System.String get_GeneratorVersion()",
+          "System.String get_SourceHash()",
+          "System.String get_SourceJson()",
+          "System.String get_SourcePath()",
+          "Void .ctor()",
+          "Void SetSource(AFrame.Data.DefinitionDocument, System.String, System.String, System.String, System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Data.DefinitionRegistry",
+        "members": [
+          "Boolean TryGet(System.String, AFrame.Data.AFrameDefinitionAsset ByRef)",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Data.AFrameDefinitionAsset] Definitions",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Data.AFrameDefinitionAsset] get_Definitions()",
+          "Void .ctor()",
+          "Void SetDefinitions(System.Collections.Generic.IEnumerable`1[AFrame.Data.AFrameDefinitionAsset])"
+        ]
+      },
+      {
+        "name": "AFrame.Data.DefinitionSourceReader",
+        "members": [
+          "AFrame.Data.DefinitionDocument ReadHeader(Newtonsoft.Json.Linq.JObject)",
+          "AFrame.Data.IDefinition ReadDefinition(System.String, System.Type)",
+          "Boolean TryRead(System.String, AFrame.Data.DefinitionDocument ByRef, System.String ByRef, System.String ByRef)",
+          "Newtonsoft.Json.Linq.JObject ReadObject(System.String)",
+          "System.Int32 CurrentVersion",
+          "System.String ComputeHash(System.String)",
+          "T ReadDefinition[T](System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Data.IDefinitionMigration",
+        "members": [
+          "Int32 FromVersion",
+          "Int32 get_FromVersion()",
+          "System.String DefinitionType",
+          "System.String get_DefinitionType()",
+          "Void Migrate(Newtonsoft.Json.Linq.JObject)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Editor",
+    "path": "Packages/com.aframe.editor/Editor/AFrame.Editor.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Editor.AFrameArchitectureValidator",
+        "members": [
+          "AFrame.Editor.ValidationReport Run(Boolean, Boolean)"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.AFrameContextBuilder",
+        "members": [
+          "Void Build()"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.AFrameDefinitionImporter",
+        "members": [
+          "Int32 ImportAll(Boolean)",
+          "System.String GeneratedRoot",
+          "System.String GeneratorVersion"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.AFrameEditorCommands",
+        "members": [
+          "Void Batch()"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.AFrameFeatureGenerator",
+        "members": [
+          "System.String Generate(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.AFrameMenuItems",
+        "members": []
+      },
+      {
+        "name": "AFrame.Editor.AFrameProjectInitializer",
+        "members": [
+          "Void Initialize()"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.ValidationIssue",
+        "members": [
+          "System.String message",
+          "System.String path",
+          "System.String scope",
+          "System.String severity",
+          "System.String source",
+          "Void .ctor()"
+        ]
+      },
+      {
+        "name": "AFrame.Editor.ValidationReport",
+        "members": [
+          "AFrame.Editor.ValidationIssue[] issues",
+          "System.Boolean succeeded",
+          "System.String generatedAtUtc",
+          "System.String[] checkedScopes",
+          "System.String[] covered",
+          "System.String[] notCovered",
+          "Void .ctor()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Foundation",
+    "path": "Packages/com.aframe.foundation/Runtime/AFrame.Foundation.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Foundation.AFrameError",
+        "members": [
+          "Boolean Equals(AFrame.Foundation.AFrameError)",
+          "Boolean Equals(System.Object)",
+          "Int32 GetHashCode()",
+          "System.String Code",
+          "System.String Message",
+          "System.String ToString()",
+          "System.String get_Code()",
+          "System.String get_Message()",
+          "Void .ctor(System.String, System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.EntityId",
+        "members": [
+          "AFrame.Foundation.EntityId None",
+          "AFrame.Foundation.EntityId get_None()",
+          "Boolean Equals(AFrame.Foundation.EntityId)",
+          "Boolean Equals(System.Object)",
+          "Int32 GetHashCode()",
+          "Int64 Value",
+          "Int64 get_Value()",
+          "Void .ctor(Int64)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.Float3",
+        "members": [
+          "AFrame.Foundation.Float3 Zero",
+          "AFrame.Foundation.Float3 get_Zero()",
+          "AFrame.Foundation.Float3 op_Addition(AFrame.Foundation.Float3, AFrame.Foundation.Float3)",
+          "AFrame.Foundation.Float3 op_Multiply(AFrame.Foundation.Float3, Single)",
+          "Boolean Equals(AFrame.Foundation.Float3)",
+          "Boolean Equals(System.Object)",
+          "Int32 GetHashCode()",
+          "System.Single x",
+          "System.Single y",
+          "System.Single z",
+          "System.String ToString()",
+          "Void .ctor(Single, Single, Single)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.IClock",
+        "members": [
+          "Double DeltaTime",
+          "Double Time",
+          "Double get_DeltaTime()",
+          "Double get_Time()"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.IRandomSource",
+        "members": [
+          "Int32 Next(Int32, Int32)",
+          "Single NextFloat()"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.ModuleId",
+        "members": [
+          "Boolean Equals(AFrame.Foundation.ModuleId)",
+          "Boolean Equals(System.Object)",
+          "Boolean IsValid",
+          "Boolean get_IsValid()",
+          "Boolean op_Equality(AFrame.Foundation.ModuleId, AFrame.Foundation.ModuleId)",
+          "Boolean op_Inequality(AFrame.Foundation.ModuleId, AFrame.Foundation.ModuleId)",
+          "Int32 GetHashCode()",
+          "System.String ToString()",
+          "System.String Value",
+          "System.String get_Value()",
+          "Void .ctor(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.PlayerId",
+        "members": [
+          "AFrame.Foundation.PlayerId None",
+          "AFrame.Foundation.PlayerId get_None()",
+          "Boolean Equals(AFrame.Foundation.PlayerId)",
+          "Boolean Equals(System.Object)",
+          "Int32 GetHashCode()",
+          "System.String ToString()",
+          "System.String Value",
+          "System.String get_Value()",
+          "Void .ctor(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.Result",
+        "members": [
+          "AFrame.Foundation.AFrameError Error",
+          "AFrame.Foundation.AFrameError get_Error()",
+          "AFrame.Foundation.Result Fail(System.String, System.String)",
+          "AFrame.Foundation.Result Ok()",
+          "Boolean Failed",
+          "Boolean Succeeded",
+          "Boolean get_Failed()",
+          "Boolean get_Succeeded()"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.Result`1",
+        "members": [
+          "AFrame.Foundation.AFrameError Error",
+          "AFrame.Foundation.AFrameError get_Error()",
+          "AFrame.Foundation.Result`1[T] Fail(System.String, System.String)",
+          "AFrame.Foundation.Result`1[T] Ok(T)",
+          "Boolean Failed",
+          "Boolean Succeeded",
+          "Boolean get_Failed()",
+          "Boolean get_Succeeded()",
+          "T Value",
+          "T get_Value()"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.StableIdAttribute",
+        "members": [
+          "System.String Id",
+          "System.String get_Id()",
+          "Void .ctor(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.SystemClock",
+        "members": [
+          "Double DeltaTime",
+          "Double Time",
+          "Double get_DeltaTime()",
+          "Double get_Time()",
+          "Void .ctor()"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.SystemRandomSource",
+        "members": [
+          "Int32 Next(Int32, Int32)",
+          "Single NextFloat()",
+          "Void .ctor(Int32)"
+        ]
+      },
+      {
+        "name": "AFrame.Foundation.ViewKey",
+        "members": [
+          "System.String Value",
+          "System.String get_Value()",
+          "Void .ctor(System.String)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Character.Composition",
+    "path": "Assets/Game/Composition/Character/Character.Composition.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Character.CharacterDefinitionMigration",
+        "members": [
+          "Int32 FromVersion",
+          "Int32 get_FromVersion()",
+          "System.String DefinitionType",
+          "System.String get_DefinitionType()",
+          "Void .ctor()",
+          "Void Migrate(Newtonsoft.Json.Linq.JObject)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterDefinitionModuleAsset",
+        "members": [
+          "AFrame.Runtime.IGameModule CreateModule()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterSampleEntry",
+        "members": [
+          "Boolean SmokeComplete",
+          "Boolean get_SmokeComplete()",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] Features",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] get_Features()",
+          "System.Nullable`1[AFrame.Unity.GameDimension] DimensionOverride",
+          "System.Nullable`1[AFrame.Unity.GameDimension] get_DimensionOverride()",
+          "Void .ctor()",
+          "Void BeginSmoke()",
+          "Void Enter(AFrame.Unity.AFrameBootstrap)",
+          "Void SampleInput()",
+          "Void VerifySmoke()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Character.Contracts",
+    "path": "Assets/Game/Features/Character/Contracts/Character.Contracts.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Character.CharacterDefinition",
+        "members": [
+          "System.Single speed",
+          "Void .ctor()",
+          "Void Validate()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterInput",
+        "members": [
+          "AFrame.Foundation.Float3 Movement",
+          "AFrame.Foundation.Float3 get_Movement()",
+          "Boolean Sprinting",
+          "Boolean get_Sprinting()",
+          "Void .ctor(AFrame.Foundation.Float3, Boolean)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterMovedEvent",
+        "members": [
+          "AFrame.Foundation.Float3 Position",
+          "AFrame.Foundation.Float3 get_Position()",
+          "Void .ctor(AFrame.Foundation.Float3)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.DefinitionIds",
+        "members": [
+          "System.String CharacterDefault"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.ICharacterDefinitions",
+        "members": [
+          "AFrame.Game.Character.CharacterDefinition Get(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.ICharacterState",
+        "members": [
+          "AFrame.Foundation.Float3 Position",
+          "AFrame.Foundation.Float3 get_Position()",
+          "Single Speed",
+          "Single get_Speed()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.MoveCharacterCommand",
+        "members": [
+          "AFrame.Foundation.Float3 Direction",
+          "AFrame.Foundation.Float3 get_Direction()",
+          "Void .ctor(AFrame.Foundation.Float3)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.SetCharacterMovement",
+        "members": [
+          "AFrame.Foundation.Float3 Direction",
+          "AFrame.Foundation.Float3 get_Direction()",
+          "Boolean Sprinting",
+          "Boolean get_Sprinting()",
+          "Void .ctor(AFrame.Foundation.Float3, Boolean)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Character.Core",
+    "path": "Assets/Game/Features/Character/Core/Character.Core.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Character.CharacterModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Foundation.Result Handle(AFrame.Runtime.CommandEnvelope ByRef, AFrame.Game.Character.MoveCharacterCommand ByRef)",
+          "AFrame.Foundation.Result Handle(AFrame.Runtime.CommandEnvelope ByRef, AFrame.Game.Character.SetCharacterMovement ByRef)",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor(System.String, AFrame.Foundation.Float3)",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void FixedTick(AFrame.Runtime.TickContext ByRef)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Character.Editor",
+    "path": "Assets/Game/Composition/Character/Editor/AFrame.Game.Character.Editor.asmdef",
+    "types": []
+  },
+  {
+    "assembly": "AFrame.Game.Character.Tests",
+    "path": "Assets/Game/Features/Character/Tests/AFrame.Game.Character.Tests.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Character.Tests.CharacterTests",
+        "members": [
+          "Void .ctor()",
+          "Void InvalidMoveIsRejectedWithoutChangingState()",
+          "Void MovementChangesStateAndEmitsEventOnNextTick()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Character.Unity",
+    "path": "Assets/Game/Features/Character/Runtime/Adapters/AFrame.Game.Character.Unity.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Character.CharacterInputAdapter",
+        "members": [
+          "AFrame.Game.Character.CharacterInput Get(AFrame.Foundation.PlayerId)",
+          "Void .ctor()",
+          "Void Freeze()",
+          "Void Sample(Boolean)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterInputModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor(AFrame.Game.Character.CharacterInputAdapter)",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Character.CharacterView",
+        "members": [
+          "Void .ctor()",
+          "Void Bind(AFrame.Unity.IViewContext)",
+          "Void OnRender(Single)",
+          "Void OnTickCompleted()",
+          "Void Unbind()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.EnergyStation.Composition",
+    "path": "Assets/Game/Composition/EnergyStation/EnergyStation.Composition.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.EnergyStation.EnergyStationScene",
+        "members": [
+          "Boolean SmokeComplete",
+          "Boolean get_SmokeComplete()",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] Features",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] get_Features()",
+          "System.Nullable`1[AFrame.Unity.GameDimension] DimensionOverride",
+          "System.Nullable`1[AFrame.Unity.GameDimension] get_DimensionOverride()",
+          "Void .ctor()",
+          "Void BeginSmoke()",
+          "Void Enter(AFrame.Unity.AFrameBootstrap)",
+          "Void SampleInput()",
+          "Void VerifySmoke()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Exit.Contracts",
+    "path": "Assets/Game/Features/Exit/Contracts/Exit.Contracts.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Exit.IStationExitQuery",
+        "members": [
+          "Boolean HasTimedOut",
+          "Boolean IsCleared",
+          "Boolean IsUnlocked",
+          "Boolean get_HasTimedOut()",
+          "Boolean get_IsCleared()",
+          "Boolean get_IsUnlocked()",
+          "Double SecondsRemaining",
+          "Double get_SecondsRemaining()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Exit.ReachStationExit",
+        "members": []
+      },
+      {
+        "name": "AFrame.Game.Exit.StationCleared",
+        "members": []
+      },
+      {
+        "name": "AFrame.Game.Exit.StationProgress",
+        "members": [
+          "Boolean Cleared",
+          "Boolean TimedOut",
+          "Boolean get_Cleared()",
+          "Boolean get_TimedOut()",
+          "Double SecondsRemaining",
+          "Double get_SecondsRemaining()",
+          "Void .ctor(Double, Boolean, Boolean)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Exit.StationTimedOut",
+        "members": []
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Exit.Core",
+    "path": "Assets/Game/Features/Exit/Core/Exit.Core.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Exit.ExitModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor(Single)",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Inventory.Contracts",
+    "path": "Assets/Game/Features/Inventory/Contracts/Inventory.Contracts.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Inventory.EnergyCoreStored",
+        "members": [
+          "Int32 CoreId",
+          "Int32 get_CoreId()",
+          "Void .ctor(Int32)"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Inventory.IInventoryQuery",
+        "members": [
+          "Boolean Contains(Int32)",
+          "Int32 Collected",
+          "Int32 Total",
+          "Int32 get_Collected()",
+          "Int32 get_Total()"
+        ]
+      },
+      {
+        "name": "AFrame.Game.Inventory.StoreEnergyCore",
+        "members": [
+          "Int32 CoreId",
+          "Int32 get_CoreId()",
+          "Void .ctor(Int32)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Inventory.Core",
+    "path": "Assets/Game/Features/Inventory/Core/Inventory.Core.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Inventory.InventoryModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor(Int32)",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Pickup.Contracts",
+    "path": "Assets/Game/Features/Pickup/Contracts/Pickup.Contracts.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Pickup.CollectEnergyCore",
+        "members": [
+          "Int32 CoreId",
+          "Int32 get_CoreId()",
+          "Void .ctor(Int32)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Game.Pickup.Core",
+    "path": "Assets/Game/Features/Pickup/Core/Pickup.Core.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Game.Pickup.PickupModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void .ctor()",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Input",
+    "path": "Packages/com.aframe.input/Runtime/AFrame.Input.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Input.IInputSource",
+        "members": [
+          "AFrame.Input.InputSnapshot Read()"
+        ]
+      },
+      {
+        "name": "AFrame.Input.InputSnapshot",
+        "members": [
+          "AFrame.Foundation.Float3 Movement",
+          "AFrame.Foundation.Float3 get_Movement()",
+          "Boolean PrimaryPressed",
+          "Boolean get_PrimaryPressed()",
+          "Void .ctor(AFrame.Foundation.Float3, Boolean)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Network",
+    "path": "Packages/com.aframe.network/Runtime/AFrame.Network.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Network.INetworkSession",
+        "members": [
+          "AFrame.Network.NetworkRole Role",
+          "AFrame.Network.NetworkRole get_Role()",
+          "Boolean IsConnected",
+          "Boolean get_IsConnected()",
+          "Void Send(AFrame.Runtime.ICommand)"
+        ]
+      },
+      {
+        "name": "AFrame.Network.NetworkRole",
+        "members": [
+          "AFrame.Network.NetworkRole Client",
+          "AFrame.Network.NetworkRole Host",
+          "AFrame.Network.NetworkRole Offline",
+          "AFrame.Network.NetworkRole Server",
+          "System.Int32 value__"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Physics",
+    "path": "Packages/com.aframe.physics/Runtime/AFrame.Physics.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Physics.IPhysicsQuery",
+        "members": [
+          "Boolean TryMove(Int32, AFrame.Foundation.Float3, AFrame.Physics.PhysicsHit ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Physics.PhysicsHit",
+        "members": [
+          "AFrame.Foundation.Float3 Normal",
+          "AFrame.Foundation.Float3 Point",
+          "AFrame.Foundation.Float3 get_Normal()",
+          "AFrame.Foundation.Float3 get_Point()",
+          "Int32 EntityId",
+          "Int32 get_EntityId()",
+          "Void .ctor(Int32, AFrame.Foundation.Float3, AFrame.Foundation.Float3)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Runtime",
+    "path": "Packages/com.aframe.runtime/Runtime/AFrame.Runtime.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Runtime.CommandDispatcher",
+        "members": [
+          "Void .ctor()",
+          "Void Register[TCommand](AFrame.Runtime.ICommandHandler`1[TCommand])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.CommandEnvelope",
+        "members": [
+          "AFrame.Foundation.PlayerId Issuer",
+          "AFrame.Foundation.PlayerId get_Issuer()",
+          "AFrame.Runtime.ICommand Payload",
+          "AFrame.Runtime.ICommand get_Payload()",
+          "Int64 Sequence",
+          "Int64 Tick",
+          "Int64 get_Sequence()",
+          "Int64 get_Tick()",
+          "Void .ctor(AFrame.Foundation.PlayerId, Int64, Int64, AFrame.Runtime.ICommand)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.CommandRejectedEvent",
+        "members": [
+          "AFrame.Foundation.AFrameError Error",
+          "AFrame.Foundation.AFrameError get_Error()",
+          "AFrame.Runtime.CommandEnvelope Command",
+          "AFrame.Runtime.CommandEnvelope get_Command()",
+          "Void .ctor(AFrame.Runtime.CommandEnvelope, AFrame.Foundation.AFrameError)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.EntityDespawned",
+        "members": [
+          "AFrame.Foundation.EntityId Entity",
+          "AFrame.Foundation.EntityId get_Entity()",
+          "Void .ctor(AFrame.Foundation.EntityId)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.EntitySpawned",
+        "members": [
+          "AFrame.Foundation.EntityId Entity",
+          "AFrame.Foundation.EntityId get_Entity()",
+          "AFrame.Foundation.ViewKey View",
+          "AFrame.Foundation.ViewKey get_View()",
+          "Void .ctor(AFrame.Foundation.EntityId, AFrame.Foundation.ViewKey)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.EventStream",
+        "members": [
+          "System.IDisposable Subscribe[TEvent](System.Action`1[TEvent])",
+          "Void .ctor()",
+          "Void Flush(Int32)",
+          "Void Publish[TEvent](TEvent)",
+          "Void Raise[TEvent](TEvent ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.GameModuleHost",
+        "members": [
+          "AFrame.Runtime.GameModuleHost CreateApplication()",
+          "AFrame.Runtime.HostState State",
+          "AFrame.Runtime.HostState get_State()",
+          "AFrame.Runtime.ModuleContext Context",
+          "AFrame.Runtime.ModuleContext get_Context()",
+          "AFrame.Runtime.ModuleRegistrationSummary DescribeRegistration(AFrame.Runtime.IGameModule)",
+          "Boolean IsRunning",
+          "Boolean get_IsRunning()",
+          "System.Exception Fault",
+          "System.Exception get_Fault()",
+          "Void .ctor()",
+          "Void .ctor(AFrame.Runtime.GameModuleHost)",
+          "Void Dispose()",
+          "Void Pause()",
+          "Void Resume()",
+          "Void Start(System.Collections.Generic.IEnumerable`1[AFrame.Runtime.IGameModule], AFrame.Foundation.IClock, Single)",
+          "Void Stop()",
+          "Void Tick()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.HostState",
+        "members": [
+          "AFrame.Runtime.HostState Faulted",
+          "AFrame.Runtime.HostState Paused",
+          "AFrame.Runtime.HostState Running",
+          "AFrame.Runtime.HostState Starting",
+          "AFrame.Runtime.HostState Stopped",
+          "AFrame.Runtime.HostState Stopping",
+          "System.Int32 value__"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ICommand",
+        "members": []
+      },
+      {
+        "name": "AFrame.Runtime.ICommandDispatcher",
+        "members": [
+          "Void Register[TCommand](AFrame.Runtime.ICommandHandler`1[TCommand])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ICommandHandler`1",
+        "members": [
+          "AFrame.Foundation.Result Handle(AFrame.Runtime.CommandEnvelope ByRef, TCommand ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ICommandSink",
+        "members": [
+          "Void Submit[TCommand](AFrame.Foundation.PlayerId, TCommand ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ICommandTransport",
+        "members": [
+          "Void Send(AFrame.Foundation.PlayerId, AFrame.Runtime.ICommand)",
+          "Void Send(AFrame.Runtime.ICommand)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IDomainEvent",
+        "members": []
+      },
+      {
+        "name": "AFrame.Runtime.IEventPublisher",
+        "members": [
+          "Void Publish[TEvent](TEvent)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IEventSink",
+        "members": [
+          "Void Raise[TEvent](TEvent ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IEventStream",
+        "members": [
+          "System.IDisposable Subscribe[TEvent](System.Action`1[TEvent])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IEventSubscriber`1",
+        "members": [
+          "Void On(TEvent ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IFixedTickable",
+        "members": [
+          "Void FixedTick(AFrame.Runtime.TickContext ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IGameModule",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "Void Configure(AFrame.Runtime.IModuleBuilder)",
+          "Void Start(AFrame.Runtime.ModuleContext)",
+          "Void Stop()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IInputSource`1",
+        "members": [
+          "TInput Get(AFrame.Foundation.PlayerId)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IModuleBuilder",
+        "members": [
+          "Void AddCommandHandler[TCommand](AFrame.Runtime.ICommandHandler`1[TCommand])",
+          "Void AddFixedTickable(AFrame.Runtime.IFixedTickable)",
+          "Void AddService[T](T)",
+          "Void Handle[T](System.Func`2[AFrame.Runtime.IServiceResolver,AFrame.Runtime.ICommandHandler`1[T]])",
+          "Void ProvideMany[T](System.Func`2[AFrame.Runtime.IServiceResolver,T])",
+          "Void Provide[T](System.Func`2[AFrame.Runtime.IServiceResolver,T])",
+          "Void Require[T]()",
+          "Void Subscribe[T](System.Func`2[AFrame.Runtime.IServiceResolver,AFrame.Runtime.IEventSubscriber`1[T]])",
+          "Void Tick(System.Func`2[AFrame.Runtime.IServiceResolver,AFrame.Runtime.IFixedTickable])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IQuery",
+        "members": []
+      },
+      {
+        "name": "AFrame.Runtime.ISaveStore",
+        "members": [
+          "Boolean TryLoad[T](System.String, T ByRef)",
+          "Void Save[T](System.String, T)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IServiceResolver",
+        "members": [
+          "System.Collections.Generic.IReadOnlyList`1[T] GetAll[T]()",
+          "T Get[T]()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ISnapshotParticipant`1",
+        "members": [
+          "T Capture()",
+          "Void Restore(T)",
+          "Void Validate(T)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ITickInput",
+        "members": [
+          "Void Freeze()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.IViewEventStream",
+        "members": [
+          "System.IDisposable Subscribe[TEvent](System.Action`1[TEvent])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.LocalCommandTransport",
+        "members": [
+          "Void .ctor()",
+          "Void Send(AFrame.Foundation.PlayerId, AFrame.Runtime.ICommand)",
+          "Void Send(AFrame.Runtime.ICommand)",
+          "Void Submit[TCommand](AFrame.Foundation.PlayerId, TCommand ByRef)"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ModuleContext",
+        "members": [
+          "AFrame.Foundation.IClock Clock",
+          "AFrame.Foundation.IClock get_Clock()",
+          "AFrame.Runtime.ICommandTransport Transport",
+          "AFrame.Runtime.ICommandTransport get_Transport()",
+          "AFrame.Runtime.IEventStream Events",
+          "AFrame.Runtime.IEventStream get_Events()",
+          "Int64 Tick",
+          "Int64 get_Tick()",
+          "Single TickDeltaTime",
+          "Single get_TickDeltaTime()",
+          "System.Collections.Generic.IReadOnlyList`1[T] GetAll[T]()",
+          "T Get[T]()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ModuleGraph",
+        "members": [
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Runtime.IGameModule] GetOrderedModules()",
+          "Void .ctor(System.Collections.Generic.IEnumerable`1[AFrame.Runtime.IGameModule], System.Collections.Generic.IReadOnlyDictionary`2[AFrame.Foundation.ModuleId,AFrame.Runtime.ModuleScope])"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ModuleRegistrationSummary",
+        "members": [
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] Collections",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] Commands",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] Provided",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] Required",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] get_Collections()",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] get_Commands()",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] get_Provided()",
+          "System.Collections.Generic.IReadOnlyList`1[System.Type] get_Required()"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.ModuleScope",
+        "members": [
+          "AFrame.Runtime.ModuleScope App",
+          "AFrame.Runtime.ModuleScope Scene",
+          "AFrame.Runtime.ModuleScope Session",
+          "System.Int32 value__"
+        ]
+      },
+      {
+        "name": "AFrame.Runtime.TickContext",
+        "members": [
+          "Int64 Tick",
+          "Int64 get_Tick()",
+          "Single DeltaTime",
+          "Single get_DeltaTime()",
+          "Void .ctor(Int64, Single)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Runtime.Tests",
+    "path": "Assets/Game/Tests/Runtime/AFrame.Runtime.Tests.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Tests.RuntimeTests",
+        "members": [
+          "Void .ctor()",
+          "Void InvalidProviderGraphStopsBeforeModulesStart(Boolean)",
+          "Void TickDispatchesInSequenceBeforeSimulationAndEvents()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Save",
+    "path": "Packages/com.aframe.save/Runtime/AFrame.Save.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Save.AtomicJsonFile",
+        "members": [
+          "Boolean Exists",
+          "Boolean get_Exists()",
+          "System.String Read()",
+          "Void .ctor(System.String)",
+          "Void Write(System.String)"
+        ]
+      },
+      {
+        "name": "AFrame.Save.MemorySaveStore",
+        "members": [
+          "Boolean TryLoad[T](System.String, T ByRef)",
+          "Void .ctor()",
+          "Void Save[T](System.String, T)"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.TestGame",
+    "path": "Assets/Game/Tests/TestGame/AFrame.TestGame.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Testing.TestGame",
+        "members": [
+          "AFrame.Runtime.ModuleContext Context",
+          "AFrame.Runtime.ModuleContext get_Context()",
+          "Void .ctor(System.Collections.Generic.IEnumerable`1[AFrame.Runtime.IGameModule], System.Collections.Generic.IEnumerable`1[AFrame.Runtime.IGameModule], Single)",
+          "Void Dispose()",
+          "Void Submit[T](T ByRef)",
+          "Void Tick()"
+        ]
+      }
+    ]
+  },
+  {
+    "assembly": "AFrame.Unity",
+    "path": "Packages/com.aframe.unity/Runtime/AFrame.Unity.asmdef",
+    "types": [
+      {
+        "name": "AFrame.Unity.AFrameBootstrap",
+        "members": [
+          "AFrame.Runtime.HostState SessionState",
+          "AFrame.Runtime.HostState get_SessionState()",
+          "AFrame.Runtime.ModuleContext Context",
+          "AFrame.Runtime.ModuleContext get_Context()",
+          "AFrame.Unity.AFrameGameProfile Profile",
+          "AFrame.Unity.AFrameGameProfile get_Profile()",
+          "Boolean IsRunning",
+          "Boolean get_IsRunning()",
+          "System.Exception SessionFault",
+          "System.Exception get_SessionFault()",
+          "System.String ProfileResource",
+          "T GetAppService[T]()",
+          "Void .ctor()",
+          "Void AtTickBoundary(System.Action)",
+          "Void BeginSession(System.Collections.Generic.IEnumerable`1[AFrame.Runtime.IGameModule], System.Action`1[AFrame.Runtime.ModuleContext])",
+          "Void BindView(AFrame.Unity.AFrameView, AFrame.Foundation.EntityId)",
+          "Void EndSession()",
+          "Void PauseSession()",
+          "Void ResumeSession()",
+          "Void UnbindView(AFrame.Unity.AFrameView)"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.AFrameGameProfile",
+        "members": [
+          "AFrame.Data.DefinitionRegistry Definitions",
+          "AFrame.Data.DefinitionRegistry get_Definitions()",
+          "AFrame.Unity.GameDimension Dimension",
+          "AFrame.Unity.GameDimension get_Dimension()",
+          "AFrame.Unity.GameNetworkMode NetworkMode",
+          "AFrame.Unity.GameNetworkMode get_NetworkMode()",
+          "Int32 MaxTicksPerFrame",
+          "Int32 get_MaxTicksPerFrame()",
+          "Single TickDeltaTime",
+          "Single TickRate",
+          "Single get_TickDeltaTime()",
+          "Single get_TickRate()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Runtime.IGameModule] CreateModules(System.Nullable`1[AFrame.Runtime.ModuleScope])",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Unity.AFrameModuleAsset] Modules",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Unity.AFrameModuleAsset] get_Modules()",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] EnabledFeatures",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] get_EnabledFeatures()",
+          "System.String ProfileId",
+          "System.String get_ProfileId()",
+          "Void .ctor()",
+          "Void Configure(System.String, System.Collections.Generic.IEnumerable`1[AFrame.Unity.AFrameModuleAsset])",
+          "Void SetDefinitions(AFrame.Data.DefinitionRegistry)"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.AFrameModuleAsset",
+        "members": [
+          "AFrame.Foundation.ModuleId Id",
+          "AFrame.Foundation.ModuleId get_Id()",
+          "AFrame.Runtime.IGameModule CreateModule()",
+          "AFrame.Runtime.ModuleScope Scope",
+          "AFrame.Runtime.ModuleScope get_Scope()",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] Dependencies",
+          "System.Collections.Generic.IReadOnlyList`1[AFrame.Foundation.ModuleId] get_Dependencies()",
+          "System.String IdString",
+          "System.String get_IdString()"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.AFrameSceneEntry",
+        "members": [
+          "AFrame.Unity.AFrameBootstrap Host",
+          "AFrame.Unity.AFrameBootstrap get_Host()",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] Features",
+          "System.Collections.Generic.IReadOnlyList`1[System.String] get_Features()",
+          "System.Nullable`1[AFrame.Unity.GameDimension] DimensionOverride",
+          "System.Nullable`1[AFrame.Unity.GameDimension] get_DimensionOverride()",
+          "Void Enter(AFrame.Unity.AFrameBootstrap)",
+          "Void SampleInput()"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.AFrameView",
+        "members": [
+          "Void Bind(AFrame.Unity.IViewContext)",
+          "Void OnRender(Single)",
+          "Void OnTickCompleted()",
+          "Void Unbind()"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.GameDimension",
+        "members": [
+          "AFrame.Unity.GameDimension ThreeD",
+          "AFrame.Unity.GameDimension TwoD",
+          "System.Int32 value__"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.GameNetworkMode",
+        "members": [
+          "AFrame.Unity.GameNetworkMode Offline",
+          "AFrame.Unity.GameNetworkMode Online",
+          "System.Int32 value__"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.IAFrameSmokeScenario",
+        "members": [
+          "Boolean SmokeComplete",
+          "Boolean get_SmokeComplete()",
+          "Void BeginSmoke()",
+          "Void VerifySmoke()"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.IViewContext",
+        "members": [
+          "AFrame.Foundation.EntityId Entity",
+          "AFrame.Foundation.EntityId get_Entity()",
+          "AFrame.Runtime.ICommandSink Commands",
+          "AFrame.Runtime.ICommandSink get_Commands()",
+          "T Query[T]()",
+          "Void Subscribe[TEvent](AFrame.Runtime.IEventSubscriber`1[TEvent])"
+        ]
+      },
+      {
+        "name": "AFrame.Unity.SceneScope",
+        "members": [
+          "AFrame.Unity.AFrameBootstrap Host",
+          "AFrame.Unity.AFrameBootstrap get_Host()",
+          "Void .ctor()"
+        ]
+      }
+    ]
+  }
+]

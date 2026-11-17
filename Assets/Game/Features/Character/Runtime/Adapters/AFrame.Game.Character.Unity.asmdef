@@ -6,7 +6,6 @@
     "AFrame.Runtime",
     "AFrame.Unity",
     "AFrame.Game.Character.Contracts",
-    "AFrame.Game.Character.Core",
     "Unity.InputSystem"
   ],
   "includePlatforms": [],

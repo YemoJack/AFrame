@@ -36,3 +36,18 @@ namespace AFrame.Game.Character
         float Speed { get; }
     }
 }
+
+namespace AFrame.Game.Character
+{
+    public readonly struct CharacterInput
+    {
+        public CharacterInput(Float3 movement, bool sprinting)
+        {
+            Movement = movement;
+            Sprinting = sprinting;
+        }
+
+        public Float3 Movement { get; }
+        public bool Sprinting { get; }
+    }
+}

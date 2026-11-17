@@ -13,7 +13,7 @@ v2.2 是可实施版本。它在 v2.1 的基础上做了四件事：
 
 网络预测、回滚、完整代码生成和复杂场景自动化仍然推迟。
 
-本文档描述目标架构。当前仓库仍有部分 v1 实现，迁移状态见第 15 节。
+本文档的前 14 节描述 v2.2 的目标架构，第 15 节记录当前单机版本的实现与差异。
 
 ---
 
@@ -639,18 +639,23 @@ aframe check --task <id>    范围检查 + compile + validate + 验收测试
 
 ## 15. 当前实现与迁移
 
-当前仓库已经有 Foundation、Runtime、Data、Unity、Editor 和 Character 示例，但仍然是 v1 的实现方式：
+能源回收站已验证 macOS arm64 Mono 单机流程。首版的运行命令、已有证据和待手工确认事项见 [v2.2 首版验收清单](AFrame-v2.2-Acceptance.md)。
 
-| v1                   | v2.2                                         |
-| -------------------- | -------------------------------------------- |
-| 命令立即分发               | 先入队，在 Dispatch 阶段执行                          |
-| 读取 Unity 时间          | 使用 `TickContext`                             |
-| 同步启动模块               | 保留同步 `Start`，改为 Configure 注册 + 启动校验          |
-| 每个功能一个程序集            | Contracts / Core / Unity 三个程序集 + Composition |
-| 场景中放置 Bootstrap（如果有） | 运行时自动创建                                      |
-| 只有菜单工具               | 菜单、batchmode 和命令通道共用一套服务                     |
+| 范围 | 当前实现 |
+| --- | --- |
+| 分包与装配 | 五个本地 UPM 基础包分开分发。保留 `IGameModule.Dependencies`、非泛型 `CommandEnvelope` 和兼容的队列入口。新增 `Require/Provide/ProvideMany` 及工厂依赖校验。App 与 Session 分容器，Scene 由 Unity 管理。 |
+| 启动与失败 | 从 Resources 自动加载 Profile 并创建持久宿主。启动失败逆序清理，未处理的 Tick 异常停止当前会话并记录现场。业务错误返回 `Result.Fail`。 |
+| 输入与视图 | 帧输入在 Tick 前冻结。领域事件先于视图分发，Tick 后读取查询并按累加器插值。场景视图解绑，2D 示例通过 Profile 的 Prefab 键生成角色。两个示例共用 Character Core，分别映射 XY 与 XZ。冲刺仍为按键持续状态。 |
+| 文本配置 | 保留 `id/schemaVersion/type` 头及 ScriptableObject 注册表。导入检查跨文件类型引用，支持按类型逐级迁移，产出 Contracts ID 常量与 `link.xml`。Character 速度由文本驱动。 |
+| AI 工具 | 识别 `feature.json`、程序集、稳定 ID、定义、Profile 支持范围及生成内容完整性。使用 Cecil 扫描 Player 程序集，并预览场景与 Prefab 校验 Bootstrap 和 SceneScope。CLI 支持 TestGame 的 EditMode 用例、任务基线及实际 Play Mode Smoke，Context 通过菜单或 CLI 更新。 |
+| 存档 | Save 包提供原子 JSON 文件写入。示例使用手写快照和一个存档槽，先校验再恢复。 |
+| 接入 | 安装脚本复制五个核心包和 CLI。编辑器初始化生成默认 Profile、最小场景及任务模板，能源回收站可选安装。 |
 
-迁移期间，以当前能编译的实现为基线。每完成一个步骤，就更新本节和 README，避免把目标接口当成已经存在的 API。
+定义源可选填 `"references": [{"id": "character.default", "type": "character"}]`。导入会验证目标存在且类型一致。schema 0 的 Character 用 `moveSpeed`，导入时迁移到 schema 1 的 `speed`，原文件保留。其他类型在编辑器可见程序集中实现 `IDefinitionMigration` 声明单步迁移。生成常量按所属 Contracts 程序集归档，空项目无需生成空常量类。
+
+Profile 用 `dimension`、`networkMode` 与 `enabledFeatures` 声明支持范围。使用自有场景入口时可声明 `Features` 和 `DimensionOverride`。现有 Profile 的资源键绑定用于 Prefab；Sprite、音频仍由 Unity 资源引用管理。
+
+`Tools/aframe test [--feature character]` 运行项目的 EditMode 测试。`check` 读取任务中测试全名或通配符，零用例按失败处理。自然语言条目仍保留为手工验收。实际发布还需目标平台检查，包括 IL2CPP 的裁剪验证。全局 ErrorCode 注册表也尚未覆盖。物理、正式联机适配、正式发布继续按后续路线安排。
 
 ---
 

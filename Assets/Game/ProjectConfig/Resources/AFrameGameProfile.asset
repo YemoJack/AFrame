@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aa68d04ea1c4461291f95bf58a28a2c, type: 3}
+  m_Name: AFrameGameProfile
+  m_EditorClassIdentifier: AFrame.Unity::AFrame.Unity.AFrameGameProfile
+  profileId: default
+  dimension: 0
+  networkMode: 0
+  enabledFeatures: []
+  tickRate: 50
+  maxTicksPerFrame: 5
+  modules:
+  - {fileID: 11400000, guid: dbf160b315844882b3d88c1c7ab2e0b2, type: 2}
+  definitions: {fileID: 11400000, guid: ec5f061c4af7d4648b9d70165e805c39, type: 2}
+  views:
+  - key: character.sample.2d
+    prefab: {fileID: 3352532495325725315, guid: 4f54387c4ac504cb1a4373e4f7ea3b45, type: 3}

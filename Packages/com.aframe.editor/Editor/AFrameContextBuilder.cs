@@ -3,159 +3,136 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using AFrame.Data;
+using AFrame.Runtime;
 using AFrame.Unity;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace AFrame.Editor
 {
     public static class AFrameContextBuilder
     {
-        private const string ContextRoot = "Context";
+        private const string Root = "Context/";
 
         public static void Build()
         {
-            Directory.CreateDirectory(ContextRoot);
-            var report = AFrameArchitectureValidator.Run();
-
-            Write(
-                "ProjectMap.json",
-                new ProjectMapDocument
-                {
-                    projectName = Application.productName,
-                    unityVersion = Application.unityVersion,
-                    packages = ReadPackageNames(),
-                    featureManifests = FindRelative("Assets/Game/Features", "feature.manifest.json"),
-                    scripts = FindRelative("Assets/Game", "*.cs")
-                });
-
-            Write("FeatureContracts.json", BuildFeatureContracts());
-            Write("ModuleGraph.json", BuildModuleGraph());
-            Write("PublicApiIndex.json", BuildPublicApiIndex());
-            File.WriteAllText(
-                $"{ContextRoot}/ValidationReport.json",
-                JsonUtility.ToJson(report, true) + Environment.NewLine);
-            AssetDatabase.Refresh();
-
-            Debug.Log($"AFrame project context written to {ContextRoot}.");
+            foreach (var file in Render())
+                Write(file.Key, file.Value);
         }
 
-        private static FeatureContractDocument BuildFeatureContracts()
-        {
-            var summaries = new List<FeatureContractSummary>();
-            if (Directory.Exists("Assets/Game/Features"))
-            {
-                foreach (var path in Directory.GetFiles(
-                             "Assets/Game/Features",
-                             "feature.manifest.json",
-                             SearchOption.AllDirectories))
-                {
-                    var manifest = JsonUtility.FromJson<FeatureManifest>(File.ReadAllText(path));
-                    if (manifest == null)
-                        continue;
+        internal static IEnumerable<string> StaleFiles() =>
+            Render().Where(file => !File.Exists(file.Key) || File.ReadAllText(file.Key) != file.Value)
+                .Select(file => file.Key);
 
-                    summaries.Add(new FeatureContractSummary
+        internal static void WriteJson(string path, object value) => Write(path, Serialize(value));
+
+        private static void Write(string path, string payload)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            if (!File.Exists(path) || File.ReadAllText(path) != payload)
+                File.WriteAllText(path, payload);
+        }
+
+        private static string Serialize(object value) => JsonConvert.SerializeObject(value, Formatting.Indented) + "\n";
+
+        private static Dictionary<string, string> Render()
+        {
+            var assemblies = CompilationPipeline.GetAssemblies()
+                .Select(assembly => new { assembly, path = CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName(assembly.name) })
+                .Where(item => AFrameArchitectureValidator.IsAFrameAssembly(item.path))
+                .OrderBy(item => item.assembly.name, StringComparer.Ordinal).ToArray();
+            var features = Directory.Exists("Assets/Game/Features")
+                ? Directory.GetFiles("Assets/Game/Features", "feature.json", SearchOption.AllDirectories)
+                    .Select(path => path.Replace('\\', '/')).OrderBy(path => path, StringComparer.Ordinal).ToArray()
+                : Array.Empty<string>();
+            var scenes = AssetDatabase.FindAssets("t:Scene").Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => path.StartsWith("Assets/Game/", StringComparison.Ordinal)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            var profiles = AssetDatabase.FindAssets("t:AFrameGameProfile").Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => path.StartsWith("Assets/Game/", StringComparison.Ordinal)).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            var loaded = AppDomain.CurrentDomain.GetAssemblies().GroupBy(assembly => assembly.GetName().Name)
+                .ToDictionary(group => group.Key, group => group.First());
+            var validation = AFrameArchitectureValidator.Run(false, false);
+            var featureCatalog = features.Select(path => new
+            {
+                path,
+                definition = ReadManifest(path),
+                assemblies = assemblies.Where(item => item.path.StartsWith(Path.GetDirectoryName(path).Replace('\\', '/') + "/", StringComparison.Ordinal))
+                    .Select(item => item.assembly.name)
+            });
+            return new Dictionary<string, string>
+            {
+                [Root + "ProjectMap.json"] = Serialize(new
+                {
+                    unityVersion = Application.unityVersion, scenes, profiles, features,
+                    packages = Directory.GetDirectories("Packages", "com.aframe.*").Select(Path.GetFileName)
+                        .OrderBy(name => name, StringComparer.Ordinal)
+                }),
+                [Root + "ModuleGraph.json"] = Serialize(new
+                {
+                    profiles = profiles.Select(path => DescribeProfile(path)),
+                    assemblies = assemblies.Select(item => new
                     {
-                        id = manifest.id,
-                        path = path.Replace('\\', '/'),
-                        entryPoint = manifest.entryPoint,
-                        dependencies = manifest.dependencies ?? Array.Empty<string>(),
-                        acceptanceChecks = manifest.acceptanceChecks ?? Array.Empty<string>()
-                    });
-                }
-            }
-
-            return new FeatureContractDocument { features = summaries.ToArray() };
+                        name = item.assembly.name, item.path,
+                        references = item.assembly.assemblyReferences.Select(reference => reference.name)
+                            .OrderBy(value => value, StringComparer.Ordinal)
+                    })
+                }),
+                [Root + "FeatureContracts.json"] = Serialize(featureCatalog),
+                [Root + "PublicApiIndex.json"] = Serialize(assemblies.Where(item => loaded.ContainsKey(item.assembly.name))
+                    .Select(item => new
+                    {
+                        assembly = item.assembly.name, item.path,
+                        types = loaded[item.assembly.name].GetExportedTypes().OrderBy(type => type.FullName, StringComparer.Ordinal)
+                            .Select(type => new
+                            {
+                                name = type.FullName,
+                                members = type.GetMembers(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                                    .Select(member => member.ToString()).OrderBy(name => name, StringComparer.Ordinal)
+                            })
+                    })),
+                [Root + "ValidationReport.json"] = Serialize(new
+                {
+                    validation.succeeded, validation.covered, validation.checkedScopes, validation.notCovered, validation.issues
+                })
+            };
         }
 
-        private static ModuleGraphDocument BuildModuleGraph()
+        private static object ReadManifest(string path)
         {
-            var profiles = new List<ProfileModuleSummary>();
-            foreach (var guid in AssetDatabase.FindAssets("t:AFrameGameProfile"))
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var profile = AssetDatabase.LoadAssetAtPath<AFrameGameProfile>(path);
-                if (profile == null)
-                    continue;
+            try { return JObject.Parse(File.ReadAllText(path)); }
+            catch (Exception error) { return new { error = error.Message }; }
+        }
 
-                profiles.Add(new ProfileModuleSummary
+        private static object DescribeProfile(string path)
+        {
+            try
+            {
+                var modules = AssetDatabase.LoadAssetAtPath<AFrameGameProfile>(path).CreateModules();
+                return new
                 {
-                    profile = path,
-                    modules = profile.Modules
-                        .Where(module => module != null)
-                        .Select(module => new ModuleSummary
+                    path,
+                    modules = modules.OrderBy(module => module.Id.Value, StringComparer.Ordinal).Select(module =>
+                    {
+                        var registration = GameModuleHost.DescribeRegistration(module);
+                        return new
                         {
-                            id = module.IdString,
-                            dependencies = module.Dependencies == null
-                                ? Array.Empty<string>()
-                                : module.Dependencies.Select(dependency => dependency.Value).ToArray()
-                        })
-                        .ToArray()
-                });
+                            id = module.Id.Value,
+                            scope = module.Scope.ToString(),
+                            dependencies = (module.Dependencies ?? Array.Empty<AFrame.Foundation.ModuleId>())
+                                .Select(id => id.Value).OrderBy(id => id, StringComparer.Ordinal),
+                            requires = registration.Required.Select(type => type.FullName),
+                            provides = registration.Provided.Select(type => type.FullName),
+                            providesMany = registration.Collections.Select(type => type.FullName),
+                            commands = registration.Commands.Select(type => type.FullName)
+                        };
+                    }).ToArray()
+                };
             }
-
-            return new ModuleGraphDocument { profiles = profiles.ToArray() };
-        }
-
-        private static PublicApiIndexDocument BuildPublicApiIndex()
-        {
-            var entries = new List<PublicApiSummary>();
-            foreach (var path in FindFiles("Packages", "*.cs").Concat(FindFiles("Assets/Game", "*.cs")))
-            {
-                var source = File.ReadAllText(path);
-                var matches = Regex.Matches(
-                    source,
-                    @"public\s+(?:(?:sealed|abstract|static|readonly)\s+)*(?:class|struct|interface|enum)\s+([A-Za-z0-9_]+)");
-                if (matches.Count == 0)
-                    continue;
-
-                entries.Add(new PublicApiSummary
-                {
-                    assembly = Path.GetFileName(Path.GetDirectoryName(path)),
-                    path = path.Replace('\\', '/'),
-                    types = matches.Cast<Match>().Select(match => match.Groups[1].Value).Distinct().ToArray()
-                });
-            }
-
-            return new PublicApiIndexDocument { entries = entries.ToArray() };
-        }
-
-        private static string[] ReadPackageNames()
-        {
-            if (!File.Exists("Packages/manifest.json"))
-                return Array.Empty<string>();
-
-            return File.ReadAllLines("Packages/manifest.json")
-                .Select(line => line.Trim())
-                .Where(line => line.StartsWith("\"com.", StringComparison.Ordinal))
-                .Select(line => line.Substring(1, line.IndexOf('"', 1) - 1))
-                .Distinct()
-                .OrderBy(name => name, StringComparer.Ordinal)
-                .ToArray();
-        }
-
-        private static string[] FindRelative(string root, string pattern)
-        {
-            return FindFiles(root, pattern)
-                .Select(path => path.Replace('\\', '/'))
-                .OrderBy(path => path, StringComparer.Ordinal)
-                .ToArray();
-        }
-
-        private static IEnumerable<string> FindFiles(string root, string pattern)
-        {
-            return Directory.Exists(root)
-                ? Directory.GetFiles(root, pattern, SearchOption.AllDirectories)
-                : Enumerable.Empty<string>();
-        }
-
-        private static void Write<T>(string name, T value)
-        {
-            File.WriteAllText(
-                $"{ContextRoot}/{name}",
-                JsonUtility.ToJson(value, true) + Environment.NewLine);
+            catch (Exception error) { return new { path, error = error.Message }; }
         }
     }
 }

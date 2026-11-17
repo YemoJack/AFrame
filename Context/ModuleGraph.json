@@ -1,0 +1,288 @@
+{
+  "profiles": [
+    {
+      "path": "Assets/Game/ProjectConfig/Resources/AFrameGameProfile.asset",
+      "modules": [
+        {
+          "id": "game.character-definitions",
+          "scope": "App",
+          "dependencies": [],
+          "requires": [
+            "AFrame.Data.DefinitionRegistry"
+          ],
+          "provides": [
+            "AFrame.Game.Character.ICharacterDefinitions"
+          ],
+          "providesMany": [],
+          "commands": []
+        }
+      ]
+    }
+  ],
+  "assemblies": [
+    {
+      "name": "AFrame.Data",
+      "path": "Packages/com.aframe.data/Runtime/AFrame.Data.asmdef",
+      "references": [
+        "AFrame.Foundation"
+      ]
+    },
+    {
+      "name": "AFrame.Data.Unity",
+      "path": "Packages/com.aframe.data/Runtime/Unity/AFrame.Data.Unity.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Foundation",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Editor",
+      "path": "Packages/com.aframe.editor/Editor/AFrame.Editor.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Data.Unity",
+        "AFrame.Foundation",
+        "AFrame.Runtime",
+        "AFrame.Unity",
+        "UnityEditor.TestRunner",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Foundation",
+      "path": "Packages/com.aframe.foundation/Runtime/AFrame.Foundation.asmdef",
+      "references": []
+    },
+    {
+      "name": "AFrame.Game.Character.Composition",
+      "path": "Assets/Game/Composition/Character/Character.Composition.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Data.Unity",
+        "AFrame.Foundation",
+        "AFrame.Game.Character.Contracts",
+        "AFrame.Game.Character.Core",
+        "AFrame.Game.Character.Unity",
+        "AFrame.Runtime",
+        "AFrame.Unity",
+        "Unity.InputSystem",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Character.Contracts",
+      "path": "Assets/Game/Features/Character/Contracts/Character.Contracts.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Character.Core",
+      "path": "Assets/Game/Features/Character/Core/Character.Core.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Foundation",
+        "AFrame.Game.Character.Contracts",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Character.Editor",
+      "path": "Assets/Game/Composition/Character/Editor/AFrame.Game.Character.Editor.asmdef",
+      "references": [
+        "AFrame.Game.Character.Composition",
+        "AFrame.Game.Character.Unity",
+        "AFrame.Unity",
+        "UnityEditor.TestRunner",
+        "UnityEditor.UI",
+        "UnityEngine.TestRunner",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Character.Tests",
+      "path": "Assets/Game/Features/Character/Tests/AFrame.Game.Character.Tests.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Foundation",
+        "AFrame.Game.Character.Contracts",
+        "AFrame.Game.Character.Core",
+        "AFrame.Runtime",
+        "AFrame.TestGame",
+        "UnityEditor.TestRunner",
+        "UnityEditor.UI",
+        "UnityEngine.TestRunner",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Character.Unity",
+      "path": "Assets/Game/Features/Character/Runtime/Adapters/AFrame.Game.Character.Unity.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Game.Character.Contracts",
+        "AFrame.Runtime",
+        "AFrame.Unity",
+        "Unity.InputSystem",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Game.EnergyStation.Composition",
+      "path": "Assets/Game/Composition/EnergyStation/EnergyStation.Composition.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Data.Unity",
+        "AFrame.Foundation",
+        "AFrame.Game.Character.Contracts",
+        "AFrame.Game.Character.Core",
+        "AFrame.Game.Character.Unity",
+        "AFrame.Game.Exit.Contracts",
+        "AFrame.Game.Exit.Core",
+        "AFrame.Game.Inventory.Contracts",
+        "AFrame.Game.Inventory.Core",
+        "AFrame.Game.Pickup.Contracts",
+        "AFrame.Game.Pickup.Core",
+        "AFrame.Runtime",
+        "AFrame.Save",
+        "AFrame.Unity",
+        "Unity.InputSystem",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Exit.Contracts",
+      "path": "Assets/Game/Features/Exit/Contracts/Exit.Contracts.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Exit.Core",
+      "path": "Assets/Game/Features/Exit/Core/Exit.Core.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Game.Exit.Contracts",
+        "AFrame.Game.Inventory.Contracts",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Inventory.Contracts",
+      "path": "Assets/Game/Features/Inventory/Contracts/Inventory.Contracts.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Inventory.Core",
+      "path": "Assets/Game/Features/Inventory/Core/Inventory.Core.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Game.Inventory.Contracts",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Pickup.Contracts",
+      "path": "Assets/Game/Features/Pickup/Contracts/Pickup.Contracts.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Game.Pickup.Core",
+      "path": "Assets/Game/Features/Pickup/Core/Pickup.Core.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Game.Inventory.Contracts",
+        "AFrame.Game.Pickup.Contracts",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Input",
+      "path": "Packages/com.aframe.input/Runtime/AFrame.Input.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Network",
+      "path": "Packages/com.aframe.network/Runtime/AFrame.Network.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.Physics",
+      "path": "Packages/com.aframe.physics/Runtime/AFrame.Physics.asmdef",
+      "references": [
+        "AFrame.Foundation"
+      ]
+    },
+    {
+      "name": "AFrame.Runtime",
+      "path": "Packages/com.aframe.runtime/Runtime/AFrame.Runtime.asmdef",
+      "references": [
+        "AFrame.Foundation"
+      ]
+    },
+    {
+      "name": "AFrame.Runtime.Tests",
+      "path": "Assets/Game/Tests/Runtime/AFrame.Runtime.Tests.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime",
+        "AFrame.TestGame",
+        "UnityEditor.TestRunner",
+        "UnityEditor.UI",
+        "UnityEngine.TestRunner",
+        "UnityEngine.UI"
+      ]
+    },
+    {
+      "name": "AFrame.Save",
+      "path": "Packages/com.aframe.save/Runtime/AFrame.Save.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime"
+      ]
+    },
+    {
+      "name": "AFrame.TestGame",
+      "path": "Assets/Game/Tests/TestGame/AFrame.TestGame.asmdef",
+      "references": [
+        "AFrame.Foundation",
+        "AFrame.Runtime",
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner"
+      ]
+    },
+    {
+      "name": "AFrame.Unity",
+      "path": "Packages/com.aframe.unity/Runtime/AFrame.Unity.asmdef",
+      "references": [
+        "AFrame.Data",
+        "AFrame.Data.Unity",
+        "AFrame.Foundation",
+        "AFrame.Runtime",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
+      ]
+    }
+  ]
+}

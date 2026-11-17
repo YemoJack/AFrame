@@ -1,0 +1,6 @@
+{
+  "id": "single-player-baseline",
+  "goal": "Implement the AFrame small offline game baseline using Energy Station.",
+  "allowedPaths": ["Packages/com.aframe.*/**", "Assets/Game/**", "Tasks/**", "Tools/**", "Context/**", "Docs/AFrame-Architecture-v2.2.md", "README.md", "ProjectSettings/EditorBuildSettings.asset"],
+  "acceptanceChecks": ["compile", "validate", "smoke"]
+}

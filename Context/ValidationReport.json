@@ -1,0 +1,25 @@
+{
+  "succeeded": true,
+  "covered": [
+    "manifest",
+    "asmdef",
+    "reflection",
+    "definition",
+    "hash",
+    "profile",
+    "cecil",
+    "scene",
+    "prefab"
+  ],
+  "checkedScopes": [
+    "cecil: compiled player assemblies in Assets/Game and Packages/com.aframe.*",
+    "scene/prefab: scene and prefab assets under Assets",
+    "profile: Assets/Game profiles and scene entries",
+    "hash: AFrame generated definitions and code"
+  ],
+  "notCovered": [
+    "IL2CPP player build",
+    "global ErrorCode registry"
+  ],
+  "issues": []
+}

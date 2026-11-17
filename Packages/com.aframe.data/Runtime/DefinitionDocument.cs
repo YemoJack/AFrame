@@ -22,3 +22,18 @@ namespace AFrame.Data
         public string[] acceptanceChecks = Array.Empty<string>();
     }
 }
+
+namespace AFrame.Data
+{
+    [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false)]
+    public sealed class DefinitionTypeAttribute : System.Attribute
+    {
+        public DefinitionTypeAttribute(string id) => Id = id;
+        public string Id { get; }
+    }
+
+    public interface IDefinition
+    {
+        void Validate();
+    }
+}

@@ -25,7 +25,10 @@ namespace AFrame.Game.Exit
         public void Configure(IModuleBuilder builder)
         {
             state = new ExitState(timeLimitSeconds);
+            builder.Require<IInventoryQuery>();
+            builder.Require<IEventSink>();
             builder.AddService<IStationExitQuery>(state);
+            builder.AddService<ISnapshotParticipant<StationProgress>>(state);
             builder.AddCommandHandler(state);
             builder.AddFixedTickable(state);
         }
@@ -33,7 +36,7 @@ namespace AFrame.Game.Exit
         public void Start(ModuleContext context)
         {
             state.Inventory = context.Get<IInventoryQuery>();
-            state.Events = context.Get<IEventPublisher>();
+            state.Events = context.Get<IEventSink>();
         }
 
         public void Stop()
@@ -42,16 +45,36 @@ namespace AFrame.Game.Exit
             state.Events = null;
         }
 
-        private sealed class ExitState : IStationExitQuery, ICommandHandler<ReachStationExit>, IFixedTickable
+        private sealed class ExitState : IStationExitQuery, ICommandHandler<ReachStationExit>, IFixedTickable, ISnapshotParticipant<StationProgress>
         {
-            public ExitState(float timeLimitSeconds) => SecondsRemaining = timeLimitSeconds;
+            private readonly float timeLimit;
+
+            public ExitState(float timeLimitSeconds) => SecondsRemaining = timeLimit = timeLimitSeconds;
 
             public IInventoryQuery Inventory { get; set; }
-            public IEventPublisher Events { get; set; }
+            public IEventSink Events { get; set; }
             public bool IsUnlocked => !HasTimedOut && Inventory != null && Inventory.Collected == Inventory.Total;
             public bool IsCleared { get; private set; }
             public bool HasTimedOut { get; private set; }
             public double SecondsRemaining { get; private set; }
+
+            public StationProgress Capture() => new StationProgress(SecondsRemaining, IsCleared, HasTimedOut);
+
+            public void Validate(StationProgress snapshot)
+            {
+                var time = snapshot.SecondsRemaining;
+                if (double.IsNaN(time) || time < 0d || time > timeLimit
+                    || snapshot.TimedOut != (time == 0d) || snapshot.Cleared && snapshot.TimedOut)
+                    throw new ArgumentException("Invalid saved station progress.");
+            }
+
+            public void Restore(StationProgress snapshot)
+            {
+                Validate(snapshot);
+                SecondsRemaining = snapshot.SecondsRemaining;
+                IsCleared = snapshot.Cleared;
+                HasTimedOut = snapshot.TimedOut;
+            }
 
             public void FixedTick(in TickContext context)
             {
@@ -65,7 +88,7 @@ namespace AFrame.Game.Exit
 
                 SecondsRemaining = 0d;
                 HasTimedOut = true;
-                Events.Publish(new StationTimedOut());
+                Events.Raise(new StationTimedOut());
             }
 
             public Result Handle(in CommandEnvelope envelope, in ReachStationExit command)
@@ -78,7 +101,7 @@ namespace AFrame.Game.Exit
                     return Result.Fail("exit.locked", "Collect every energy core first.");
 
                 IsCleared = true;
-                Events.Publish(new StationCleared());
+                Events.Raise(new StationCleared());
                 return Result.Ok();
             }
         }

@@ -9,6 +9,7 @@
   },
   "type": "library",
   "dependencies": {
-    "com.aframe.foundation": "file:../com.aframe.foundation"
+    "com.aframe.foundation": "file:../com.aframe.foundation",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }

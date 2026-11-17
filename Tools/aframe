@@ -1,30 +1,207 @@
-#!/bin/sh
-set -eu
+#!/usr/bin/env python3
+import argparse
+import fnmatch
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+import uuid
+from pathlib import Path
 
-project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-command_name=${1:-}
-shift || true
 
-case "$command_name" in
-  validate)
-    method=AFrame.Editor.AFrameMenuItems.ValidateArchitecture
-    ;;
-  context)
-    method=AFrame.Editor.AFrameMenuItems.BuildContext
-    ;;
-  smoke)
-    method=AFrame.Editor.AFrameMenuItems.RunSmokeCheck
-    ;;
-  task)
-    method=AFrame.Editor.AFrameMenuItems.ValidateTask
-    ;;
-  check)
-    method=AFrame.Editor.AFrameMenuItems.ValidateTask
-    ;;
-  *)
-    echo "Usage: Tools/aframe {validate|context|smoke|task|check}" >&2
-    exit 2
-    ;;
-esac
+def git(*arguments):
+    return subprocess.check_output(["git", *arguments])
 
-exec unity run "$project_root" --allow-install -- --executeMethod "$method" -quit -batchmode -nographics "$@"
+
+def changed():
+    status = git("diff", "--no-renames", "--name-only", "-z", "HEAD") + git(
+        "ls-files", "--others", "--exclude-standard", "-z"
+    )
+    result = {}
+    for name in sorted(set(os.fsdecode(status).split("\0")) - {""}):
+        if name.startswith(("Library/AFrame/", "Logs/AFrame/")):
+            continue
+        path = Path(name)
+        if path.is_symlink():
+            result[name] = "link:" + os.readlink(path)
+        elif path.is_file():
+            result[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        else:
+            result[name] = "missing"
+    return result
+
+
+def read_task(task_id):
+    if not task_id or not all(ch.isalnum() or ch in "-_" for ch in task_id):
+        raise ValueError("Pass a task ID with --task.")
+    task = json.loads(Path(f"Tasks/{task_id}.task.json").read_text())
+    if task["id"] != task_id or not task.get("allowedPaths"):
+        raise ValueError("Task ID or allowedPaths is invalid.")
+    return task
+
+
+def matches(path, pattern):
+    if pattern.endswith("/**") and not any(ch in pattern[:-3] for ch in "*?["):
+        return path.startswith(pattern[:-2])
+    return path == pattern or path.startswith(pattern.rstrip("/") + "/") or fnmatch.fnmatchcase(path, pattern)
+
+
+def save_json(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(path.suffix + ".tmp")
+    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+    temp.replace(path)
+
+
+def task_check(task, baseline, scene):
+    start = json.loads(baseline.read_text())
+    if start["head"] != git("rev-parse", "HEAD").decode().strip():
+        raise ValueError("HEAD changed since task start. Start a new task baseline.")
+    before = start["changes"]
+    after = changed()
+    paths = sorted(path for path in before.keys() | after.keys() if before.get(path) != after.get(path))
+    hard_exclusions = task.get("readOnlyPaths", []) + task.get("forbiddenPaths", [])
+    errors = [
+        path for path in paths
+        if any(matches(path, pattern) for pattern in hard_exclusions)
+        or not any(matches(path, pattern) for pattern in task["allowedPaths"])
+    ]
+    choices = {
+        "AFrame/Project/Validate Architecture": "validate",
+        "AFrame/Content/Import Definitions": "import",
+        "AFrame/Project/Run Smoke Check": "smoke",
+    }
+    checks = ["compile", "validate"]
+    for name in task.get("acceptanceChecks", []):
+        value = choices.get(name, name)
+        if value not in ["compile", "validate", "import", "smoke"]:
+            raise ValueError(f"Unsupported automated acceptance check: {name}")
+        if value not in checks:
+            checks.append(value)
+    if "import" in checks:
+        checks.remove("import")
+        checks.insert(1, "import")
+    selectors, manual = [], []
+    for item in task.get("acceptance", []):
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError("An acceptance item must be a test selector or a manual instruction.")
+        if item.startswith("test:"):
+            selector = item.removeprefix("test:").strip()
+            if not selector:
+                raise ValueError("Missing test selector after test:.")
+            selectors.append(selector)
+        elif re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.*?]+", item) and "." in item:
+            selectors.append(item)
+        else:
+            manual.append(item)
+    report = {
+        "task": task["id"], "changedPaths": paths, "outOfScope": errors,
+        "checks": {}, "manualAcceptance": manual, "succeeded": False,
+    }
+    try:
+        if errors:
+            raise ValueError("Out of scope: " + ", ".join(errors))
+        for check in checks:
+            result = editor_command(check, scene)
+            report["checks"][check] = result
+            if not result["succeeded"]:
+                raise ValueError(result.get("error") or f"{check} failed.")
+        for selector in dict.fromkeys(selectors):
+            result = editor_command("test", scene, test_filter=selector)
+            report["checks"]["test:" + selector] = result
+            if not result["succeeded"]:
+                raise ValueError(result.get("error") or f"Test selection {selector} failed.")
+        report["succeeded"] = True
+        if manual:
+            print(f"{len(manual)} manual acceptance item(s) remain.")
+    finally:
+        save_json(Path(f"Logs/AFrame/task-{task['id']}.json"), report)
+
+
+def editor_command(name, scene, feature=None, test_filter=None):
+    folder = Path("Library/AFrame/Requests")
+    token = uuid.uuid4().hex
+    request = folder / f"{token}.request.json"
+    result = (folder / f"{token}.result.json").resolve()
+    editor_open = Path("Temp/UnityLockfile").exists()
+    args = {"name": name, "scene": scene or "", "result": str(result),
+            "feature": feature or "", "testFilter": test_filter or ""}
+    if editor_open:
+        save_json(request, args)
+        try:
+            deadline = time.monotonic() + 180
+            while not result.exists() and time.monotonic() < deadline:
+                time.sleep(0.25)
+            if not result.exists():
+                raise ValueError("The open Unity Editor did not respond. Check the Editor console or exit Play Mode.")
+        finally:
+            request.unlink(missing_ok=True)
+    else:
+        request = request.with_suffix(".batch")
+        save_json(request, args)
+        try:
+            log = Path(f"Logs/AFrame/{token}.unity.log").resolve()
+            log.parent.mkdir(parents=True, exist_ok=True)
+            unity_args = ["-projectPath", os.getcwd(), "-batchmode", "-nographics",
+                          "-logFile", str(log), "-executeMethod", "AFrame.Editor.AFrameEditorCommands.Batch",
+                          "-aframeRequest", str(request.resolve())]
+            overridden = os.environ.get("AFRAME_UNITY")
+            version = Path("ProjectSettings/ProjectVersion.txt").read_text().splitlines()[0].split(": ", 1)[1]
+            app = Path(f"/Applications/Unity/Hub/Editor/{version}/Unity.app/Contents/MacOS/Unity")
+            if overridden or app.is_file():
+                invocation = [overridden or str(app), *unity_args]
+            else:
+                if not shutil.which("unity"):
+                    raise ValueError("Set AFRAME_UNITY to your Unity Editor executable.")
+                invocation = ["unity", "run", os.getcwd(), "--", *unity_args[2:]]
+            process = subprocess.run(invocation, timeout=300, check=False)
+            if not result.exists():
+                raise ValueError(f"Unity exited with code {process.returncode} without a result. See {log}.")
+        finally:
+            request.unlink(missing_ok=True)
+
+    payload = json.loads(result.read_text())
+    result.unlink()
+    return payload
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run AFrame project commands.")
+    parser.add_argument("command", choices=["compile", "validate", "import", "context", "smoke", "task", "check", "initialize", "test"])
+    parser.add_argument("arguments", nargs="*")
+    parser.add_argument("--task")
+    parser.add_argument("--scene")
+    parser.add_argument("--feature", help="Feature ID for EditMode tests (or runtime).")
+    args = parser.parse_args()
+    os.chdir(Path(__file__).absolute().parent.parent)
+    if args.feature and args.command != "test":
+        raise ValueError("--feature is only supported by aframe test.")
+    if args.command in ["task", "check"]:
+        start = args.command == "task" and len(args.arguments) == 2 and args.arguments[0] == "start"
+        if args.command == "task" and not start:
+            raise ValueError("Use aframe task start <id>.")
+        task = read_task(args.arguments[1] if start else args.task)
+        baseline = Path(f"Library/AFrame/Tasks/{task['id']}.baseline.json")
+        if start:
+            save_json(baseline, {"head": git("rev-parse", "HEAD").decode().strip(), "changes": changed()})
+            print(f"Saved baseline for {task['id']}.")
+        else:
+            task_check(task, baseline, args.scene)
+    else:
+        if args.arguments:
+            raise ValueError("Unexpected positional arguments.")
+        result = editor_command(args.command, args.scene, feature=args.feature)
+        if not result["succeeded"]:
+            raise ValueError(result["error"])
+        print(f"AFrame {args.command} passed.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, subprocess.SubprocessError, KeyError) as error:
+        sys.exit(f"AFrame: {error}")

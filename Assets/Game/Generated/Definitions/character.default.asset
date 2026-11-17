@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72e4f5adc7c9c495f869480048150f14, type: 3}
+  m_Name: character_default
+  m_EditorClassIdentifier: AFrame.Data::AFrame.Data.AFrameDefinitionAsset
+  definitionId: character.default
+  schemaVersion: 1
+  definitionType: character
+  sourcePath: Assets/Game/Features/Character/Definitions/character.default.aframe.json
+  sourceHash: 4b60cbf0034892454de7c71c20a2419ad78ad77de1401234a35a8c99353b17fe
+  generatorVersion: 2.4.0
+  sourceJson: "{\n  \"id\": \"character.default\",\n  \"schemaVersion\": 1,\n  \"type\": \"character\",\n  \"speed\": 5.0\n}\n"

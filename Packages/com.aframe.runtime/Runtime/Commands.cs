@@ -43,7 +43,10 @@ namespace AFrame.Runtime
         private readonly Dictionary<Type, Func<CommandEnvelope, Result>> handlers =
             new Dictionary<Type, Func<CommandEnvelope, Result>>();
 
-        public void Register<TCommand>(ICommandHandler<TCommand> handler)
+        public void Register<TCommand>(ICommandHandler<TCommand> handler) where TCommand : struct, ICommand =>
+            Register(handler, default);
+
+        internal void Register<TCommand>(ICommandHandler<TCommand> handler, ModuleId owner)
             where TCommand : struct, ICommand
         {
             if (handler == null)
@@ -59,7 +62,11 @@ namespace AFrame.Runtime
                 if (!(envelope.Payload is TCommand command))
                     return Result.Fail("command.type_mismatch", commandType.FullName);
 
-                return handler.Handle(in envelope, in command);
+                try { return handler.Handle(in envelope, in command); }
+                catch (Exception error)
+                {
+                    throw new InvalidOperationException($"Command handler in module {owner} failed.", error);
+                }
             });
         }
 
@@ -87,6 +94,7 @@ namespace AFrame.Runtime
 
     internal interface ICommandQueue
     {
+        void Close();
         void BeginTick(long tick);
         IReadOnlyList<CommandEnvelope> Drain(long tick);
     }
@@ -96,11 +104,14 @@ namespace AFrame.Runtime
         private readonly List<CommandEnvelope> pending = new List<CommandEnvelope>();
         private long currentTick;
         private long sequence;
+        private bool closed;
 
         public void Send(ICommand command) => Send(PlayerId.None, command);
 
         public void Send(PlayerId issuer, ICommand command)
         {
+            if (closed)
+                throw new ObjectDisposedException(nameof(LocalCommandTransport));
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
 
@@ -112,6 +123,8 @@ namespace AFrame.Runtime
         {
             Send(issuer, command);
         }
+
+        void ICommandQueue.Close() { closed = true; pending.Clear(); }
 
         void ICommandQueue.BeginTick(long tick) => currentTick = tick;
 

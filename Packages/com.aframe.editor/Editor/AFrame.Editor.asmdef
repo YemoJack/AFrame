@@ -6,7 +6,8 @@
     "AFrame.Runtime",
     "AFrame.Data",
     "AFrame.Data.Unity",
-    "AFrame.Unity"
+    "AFrame.Unity",
+    "UnityEditor.TestRunner"
   ],
   "includePlatforms": [
     "Editor"

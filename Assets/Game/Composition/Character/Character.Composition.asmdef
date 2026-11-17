@@ -1,0 +1,5 @@
+{
+  "name": "AFrame.Game.Character.Composition",
+  "references": ["AFrame.Foundation", "AFrame.Runtime", "AFrame.Data", "AFrame.Data.Unity", "AFrame.Unity",
+    "AFrame.Game.Character.Core", "AFrame.Game.Character.Contracts", "AFrame.Game.Character.Unity", "Unity.InputSystem"]
+}

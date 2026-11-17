@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
+using AFrame.Foundation;
 using AFrame.Runtime;
 using UnityEngine;
+using EntityId = AFrame.Foundation.EntityId;
 
 namespace AFrame.Unity
 {
     public interface IViewContext
     {
+        EntityId Entity { get; }
         T Query<T>() where T : class, IQuery;
         ICommandSink Commands { get; }
-        void Subscribe<TEvent>(IEventSubscriber<TEvent> subscriber)
-            where TEvent : struct, IDomainEvent;
+        void Subscribe<TEvent>(IEventSubscriber<TEvent> subscriber) where TEvent : struct, IDomainEvent;
     }
 
     public abstract class AFrameView : MonoBehaviour
@@ -21,27 +23,26 @@ namespace AFrame.Unity
         public virtual void OnRender(float alpha) { }
     }
 
-    internal sealed class ViewContext : IViewContext
+    internal sealed class ViewContext : IViewContext, IDisposable
     {
-        private readonly ModuleContext moduleContext;
+        private readonly ModuleContext context;
         private readonly List<IDisposable> subscriptions = new List<IDisposable>();
 
-        public ViewContext(ModuleContext moduleContext)
+        public ViewContext(ModuleContext context, EntityId entity = default)
         {
-            this.moduleContext = moduleContext;
+            this.context = context;
+            Entity = entity;
         }
 
-        public ICommandSink Commands => moduleContext.Get<ICommandSink>();
+        public EntityId Entity { get; }
+        public ICommandSink Commands => context.Get<ICommandSink>();
+        public T Query<T>() where T : class, IQuery => context.Get<T>();
 
-        public T Query<T>() where T : class, IQuery => moduleContext.Get<T>();
-
-        public void Subscribe<TEvent>(IEventSubscriber<TEvent> subscriber)
-            where TEvent : struct, IDomainEvent
+        public void Subscribe<T>(IEventSubscriber<T> subscriber) where T : struct, IDomainEvent
         {
             if (subscriber == null)
                 throw new ArgumentNullException(nameof(subscriber));
-
-            subscriptions.Add(moduleContext.Events.Subscribe<TEvent>(eventValue => subscriber.On(in eventValue)));
+            subscriptions.Add(context.Get<IViewEventStream>().Subscribe<T>(value => subscriber.On(in value)));
         }
 
         public void Dispose()
@@ -49,50 +50,6 @@ namespace AFrame.Unity
             foreach (var subscription in subscriptions)
                 subscription.Dispose();
             subscriptions.Clear();
-        }
-    }
-
-    [DisallowMultipleComponent]
-    public sealed class SceneScope : MonoBehaviour
-    {
-        [SerializeField] private AFrameBootstrap bootstrap;
-        private readonly List<AFrameView> views = new List<AFrameView>();
-        private ViewContext context;
-
-        private void OnEnable()
-        {
-            if (bootstrap == null)
-                bootstrap = FindBootstrapInParents();
-            if (bootstrap == null || !bootstrap.IsRunning)
-                return;
-
-            context = new ViewContext(bootstrap.Context);
-            views.Clear();
-            views.AddRange(GetComponentsInChildren<AFrameView>(true));
-            foreach (var view in views)
-                view.Bind(context);
-        }
-
-        private void LateUpdate()
-        {
-            if (context == null)
-                return;
-            foreach (var view in views)
-                view.OnRender(0f);
-        }
-
-        private void OnDisable()
-        {
-            foreach (var view in views)
-                view.Unbind();
-            context?.Dispose();
-            context = null;
-            views.Clear();
-        }
-
-        private AFrameBootstrap FindBootstrapInParents()
-        {
-            return GetComponentInParent<AFrameBootstrap>();
         }
     }
 }

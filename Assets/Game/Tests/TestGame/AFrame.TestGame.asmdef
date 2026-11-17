@@ -1,0 +1,7 @@
+{
+  "name": "AFrame.TestGame",
+  "references": ["AFrame.Foundation", "AFrame.Runtime"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}

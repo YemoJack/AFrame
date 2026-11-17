@@ -163,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c09996816fe04aee83dc8d0d7958f31e, type: 3}
   m_Name:
   m_EditorClassIdentifier: AFrame.Game.EnergyStation.Composition::AFrame.Game.EnergyStation.EnergyStationScene
+  stationMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   timeLimitSeconds: 45
   coreLocations:
   - {x: -4.2, y: 0, z: -2.2}

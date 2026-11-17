@@ -1,7 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
-using AFrame.Data;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,104 +8,153 @@ namespace AFrame.Editor
 {
     public static class AFrameFeatureGenerator
     {
-        public static string Generate(string featureName)
+        public static string Generate(string typeName)
         {
-            var typeName = SanitizeTypeName(featureName);
-            var root = $"Assets/Game/Features/{typeName}";
-            var runtimeRoot = $"{root}/Runtime";
+            if (!Regex.IsMatch(typeName ?? "", @"\A[A-Z][A-Za-z0-9]*\z"))
+                throw new ArgumentException("Use a PascalCase feature name, for example QuestLog.");
+            var prefix = $"AFrame.Game.{typeName}";
+            var id = Regex.Replace(typeName, "(?<!^)[A-Z]", "-$0").ToLowerInvariant();
+            var feature = $"Assets/Game/Features/{typeName}";
+            var composition = $"Assets/Game/Composition/{typeName}";
+            if (Directory.Exists(feature) || Directory.Exists(composition))
+                throw new IOException($"A feature or composition named {typeName} already exists.");
 
-            Directory.CreateDirectory($"{runtimeRoot}/Domain");
-            Directory.CreateDirectory($"{runtimeRoot}/Application");
-            Directory.CreateDirectory($"{runtimeRoot}/Adapters");
-            Directory.CreateDirectory($"{runtimeRoot}/Contracts");
-            Directory.CreateDirectory($"{root}/Editor");
-            Directory.CreateDirectory($"{root}/Definitions");
-            Directory.CreateDirectory($"{root}/Generated");
-            Directory.CreateDirectory($"{root}/Docs");
-
-            WriteIfMissing(
-                $"{runtimeRoot}/AFrame.Game.{typeName}.Runtime.asmdef",
-                $"{{\n  \"name\": \"AFrame.Game.{typeName}.Runtime\",\n  \"rootNamespace\": \"AFrame.Game.{typeName}\",\n  \"references\": [\"AFrame.Foundation\", \"AFrame.Runtime\", \"AFrame.Data\"],\n  \"includePlatforms\": [],\n  \"excludePlatforms\": [],\n  \"allowUnsafeCode\": false,\n  \"overrideReferences\": false,\n  \"precompiledReferences\": [],\n  \"autoReferenced\": true,\n  \"defineConstraints\": [],\n  \"versionDefines\": [],\n  \"noEngineReferences\": true\n}}\n");
-
-            var manifest = new FeatureManifest
+            WriteAssembly($"{feature}/Contracts", prefix + ".Contracts", true, "AFrame.Foundation", "AFrame.Runtime");
+            WriteAssembly($"{feature}/Core", prefix + ".Core", true, "AFrame.Foundation", "AFrame.Runtime", prefix + ".Contracts");
+            WriteAssembly($"{feature}/Unity", prefix + ".Unity", false, "AFrame.Foundation", "AFrame.Runtime", "AFrame.Unity", prefix + ".Contracts");
+            WriteAssembly(composition, prefix + ".Composition", false, "AFrame.Foundation", "AFrame.Runtime", "AFrame.Unity", prefix + ".Core");
+            AFrameContextBuilder.WriteJson($"{feature}/feature.json", new
             {
-                id = $"game.{ToKebabCase(typeName)}",
-                version = "0.1.0",
-                entryPoint = $"AFrame.Game.{typeName}.{typeName}Module",
-                sourceRoots = new[] { "Runtime", "Definitions" },
-                definitionSources = new[] { "Definitions/**/*.aframe.json" },
-                acceptanceChecks = new[] { "compile", "import-definitions", "smoke" }
-            };
+                id, version = "0.1.0", physicsAuthority = "none",
+                supports = new { dimensions = new[] { "2d", "3d" }, network = new[] { "offline" } }
+            });
+            Write($"{feature}/Contracts/{typeName}Contracts.cs", $@"using AFrame.Foundation;
+using AFrame.Runtime;
 
-            WriteIfMissing(
-                $"{root}/feature.manifest.json",
-                JsonUtility.ToJson(manifest, true) + Environment.NewLine);
+namespace {prefix}
+{{
+    [StableId(""{id}.increment"")]
+    public readonly struct Increment : ICommand {{ }}
 
-            WriteIfMissing(
-                $"{root}/feature.json",
-                $"{{\n  \"id\": \"game.{ToKebabCase(typeName)}\",\n  \"version\": \"0.1.0\",\n  \"summary\": \"{typeName}\",\n  \"physicsAuthority\": \"none\",\n  \"supports\": {{ \"dimensions\": [\"2d\", \"3d\"], \"network\": [\"offline\"] }}\n}}\n");
+    public interface ICountQuery : IQuery
+    {{
+        int Count {{ get; }}
+    }}
+}}
+");
+            Write($"{feature}/Core/{typeName}Module.cs", $@"using System;
+using System.Collections.Generic;
+using AFrame.Foundation;
+using AFrame.Runtime;
 
-            WriteIfMissing(
-                $"{runtimeRoot}/Application/{typeName}Module.cs",
-                $"using System;\nusing System.Collections.Generic;\nusing AFrame.Foundation;\nusing AFrame.Runtime;\n\nnamespace AFrame.Game.{typeName}\n{{\n    public sealed class {typeName}Module : IGameModule\n    {{\n        private static readonly IReadOnlyList<ModuleId> NoDependencies = Array.Empty<ModuleId>();\n\n        public ModuleId Id => new ModuleId(\"game.{ToKebabCase(typeName)}\");\n        public ModuleScope Scope => ModuleScope.Session;\n        public IReadOnlyList<ModuleId> Dependencies => NoDependencies;\n\n        public void Configure(IModuleBuilder builder) {{ }}\n        public void Start(ModuleContext context) {{ }}\n        public void Stop() {{ }}\n    }}\n}}\n");
+namespace {prefix}
+{{
+    public sealed class {typeName}Module : IGameModule
+    {{
+        private sealed class Counter : ICountQuery, ICommandHandler<Increment>
+        {{
+            public int Count {{ get; private set; }}
+            public Result Handle(in CommandEnvelope envelope, in Increment command)
+            {{
+                Count++;
+                return Result.Ok();
+            }}
+        }}
 
-            WriteIfMissing(
-                $"{root}/Docs/{typeName}.md",
-                $"# {typeName}\n\nThis feature owns its domain rules, application services and adapters.\n\n## Entry point\n\n`AFrame.Game.{typeName}.{typeName}Module`\n\n## Acceptance checks\n\n- Project compiles.\n- Definitions import without validation errors.\n- The feature smoke scenario runs.\n");
+        public ModuleId Id => new ModuleId(""game.{id}"");
+        public ModuleScope Scope => ModuleScope.Session;
+        public IReadOnlyList<ModuleId> Dependencies => Array.Empty<ModuleId>();
+        public void Configure(IModuleBuilder builder)
+        {{
+            builder.Provide<Counter>(_ => new Counter());
+            builder.Provide<ICountQuery>(services => services.Get<Counter>());
+            builder.Handle<Increment>(services => services.Get<Counter>());
+        }}
 
+        public void Start(ModuleContext context) {{ }}
+        public void Stop() {{ }}
+    }}
+}}
+");
+            Write($"{feature}/Unity/{typeName}View.cs", $@"using AFrame.Foundation;
+using AFrame.Unity;
+using UnityEngine;
+
+namespace {prefix}
+{{
+    public sealed class {typeName}View : AFrameView
+    {{
+        private IViewContext view;
+        private ICountQuery counter;
+        public override void Bind(IViewContext context)
+        {{
+            view = context;
+            counter = context.Query<ICountQuery>();
+        }}
+
+        public override void Unbind() => view = null;
+
+        private void OnGUI()
+        {{
+            if (view != null && GUILayout.Button($""Count {{counter.Count}}""))
+                view.Commands.Submit(PlayerId.None, new Increment());
+        }}
+    }}
+}}
+");
+            Write($"{composition}/{typeName}ModuleAsset.cs", $@"using System;
+using System.Collections.Generic;
+using AFrame.Foundation;
+using AFrame.Runtime;
+using AFrame.Unity;
+using UnityEngine;
+
+namespace {prefix}
+{{
+    [CreateAssetMenu(menuName = ""AFrame/Modules/{typeName}"")]
+    public sealed class {typeName}ModuleAsset : AFrameModuleAsset
+    {{
+        private void OnValidate() => EnsureModuleId(""game.{id}"");
+        public override IReadOnlyList<ModuleId> Dependencies => Array.Empty<ModuleId>();
+        public override IGameModule CreateModule() => new {typeName}Module();
+    }}
+}}
+");
+            Write($"{feature}/README.md", $"# {typeName}\n\n创建 **AFrame/Modules/{typeName}** 资产并加入默认 Profile。"
+                + $"在带有 SceneScope 的场景根下挂上 `{typeName}View`。进入 Play Mode，点击按钮确认计数增加。\n");
             AssetDatabase.Refresh();
-            Debug.Log($"AFrame feature generated at {root}.");
-            return root;
+            return feature;
         }
 
-        private static string SanitizeTypeName(string value)
+        private static void Write(string path, string value)
         {
-            var parts = (value ?? string.Empty)
-                .Split(new[] { ' ', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(part => char.ToUpperInvariant(part[0]) + part.Substring(1))
-                .ToArray();
-            var result = string.Concat(parts.Where(characters => characters.All(char.IsLetterOrDigit)));
-            if (string.IsNullOrEmpty(result))
-                result = "NewFeature";
-            if (!char.IsLetter(result[0]))
-                result = "Feature" + result;
-            return result;
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            using var file = new FileStream(path, FileMode.CreateNew);
+            using var writer = new StreamWriter(file);
+            writer.Write(value);
         }
 
-        private static string ToKebabCase(string value)
-        {
-            return string.Concat(value.Select((character, index) =>
-                index > 0 && char.IsUpper(character) ? $"-{char.ToLowerInvariant(character)}" : char.ToLowerInvariant(character).ToString()));
-        }
-
-        private static void WriteIfMissing(string path, string content)
-        {
-            if (File.Exists(path))
-                return;
-            File.WriteAllText(path, content);
-        }
-    }
-
-    public sealed class AFrameFeatureWindow : EditorWindow
-    {
-        private string featureName = "NewFeature";
+        private static void WriteAssembly(string folder, string name, bool pure, params string[] references) =>
+            AFrameContextBuilder.WriteJson($"{folder}/{name}.asmdef", new { name, references, noEngineReferences = pure });
 
         [MenuItem("AFrame/Generate/Feature")]
         private static void Open()
         {
-            GetWindow<AFrameFeatureWindow>("AFrame Feature");
+            var window = ScriptableObject.CreateInstance<FeatureWindow>();
+            window.titleContent = new GUIContent("Generate AFrame Feature");
+            window.ShowUtility();
         }
 
-        private void OnGUI()
+        private sealed class FeatureWindow : EditorWindow
         {
-            EditorGUILayout.LabelField("Feature name", EditorStyles.boldLabel);
-            featureName = EditorGUILayout.TextField(featureName);
-            EditorGUILayout.Space(8f);
-
-            if (GUILayout.Button("Generate"))
+            private string featureName = "NewFeature";
+            private void OnGUI()
             {
-                AFrameFeatureGenerator.Generate(featureName);
-                Close();
+                featureName = EditorGUILayout.TextField("Feature", featureName);
+                if (!GUILayout.Button("Generate"))
+                    return;
+                try { Generate(featureName); Close(); }
+                catch (Exception error) { EditorUtility.DisplayDialog("AFrame", error.Message, "OK"); }
             }
         }
     }

@@ -11,6 +11,8 @@ namespace AFrame.Data
 
         public IReadOnlyList<AFrameDefinitionAsset> Definitions => definitions;
 
+        public void SetDefinitions(IEnumerable<AFrameDefinitionAsset> values) => definitions = new List<AFrameDefinitionAsset>(values);
+
         public bool TryGet(string id, out AFrameDefinitionAsset definition)
         {
             foreach (var candidate in definitions)

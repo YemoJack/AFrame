@@ -11,7 +11,12 @@
     "AFrame.Game.Pickup.Contracts",
     "AFrame.Game.Pickup.Core",
     "AFrame.Game.Exit.Contracts",
-    "AFrame.Game.Exit.Core"
+    "AFrame.Game.Exit.Core",
+    "AFrame.Save",
+    "AFrame.Data",
+    "AFrame.Data.Unity",
+    "AFrame.Game.Character.Contracts",
+    "AFrame.Game.Character.Core"
   ],
   "noEngineReferences": false
 }

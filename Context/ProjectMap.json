@@ -1,0 +1,31 @@
+{
+  "unityVersion": "6000.6.9f1",
+  "scenes": [
+    "Assets/Game/Scenes/AFrameSampleScene.unity",
+    "Assets/Game/Scenes/Character2D.unity",
+    "Assets/Game/Scenes/EnergyStation.unity"
+  ],
+  "profiles": [
+    "Assets/Game/ProjectConfig/Resources/AFrameGameProfile.asset"
+  ],
+  "features": [
+    "Assets/Game/Features/Character/feature.json",
+    "Assets/Game/Features/Exit/feature.json",
+    "Assets/Game/Features/Inventory/feature.json",
+    "Assets/Game/Features/Pickup/feature.json"
+  ],
+  "packages": [
+    "com.aframe.audio",
+    "com.aframe.camera",
+    "com.aframe.data",
+    "com.aframe.editor",
+    "com.aframe.foundation",
+    "com.aframe.input",
+    "com.aframe.network",
+    "com.aframe.physics",
+    "com.aframe.runtime",
+    "com.aframe.save",
+    "com.aframe.ui",
+    "com.aframe.unity"
+  ]
+}

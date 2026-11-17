@@ -1,0 +1,9 @@
+{
+  "id": "desktop-acceptance",
+  "goal": "Verify scene roundtrips and cross-process save recovery in the macOS Energy Station Player.",
+  "allowedPaths": ["ProjectSettings/ProjectSettings.asset", "README.md", "Assets/Game/Composition/EnergyStation/EnergyStationScene.cs", "Assets/Game/Scenes/EnergyStation.unity", "Tasks/desktop-acceptance.task.json"],
+  "acceptance": [
+    "A single bootstrap survives the scene roundtrip, old views and subscriptions are released, and the pickup event is handled once.",
+    "A standalone macOS Player saves an unfinished session, exits, and a new process restores it through the game menu."
+  ]
+}

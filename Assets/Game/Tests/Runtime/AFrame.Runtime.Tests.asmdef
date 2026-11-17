@@ -1,0 +1,7 @@
+{
+  "name": "AFrame.Runtime.Tests",
+  "references": ["AFrame.Foundation", "AFrame.Runtime", "AFrame.TestGame"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
