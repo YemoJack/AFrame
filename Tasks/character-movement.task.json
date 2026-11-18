@@ -6,9 +6,7 @@
     "Context/**"
   ],
   "modules": [
-    "com.aframe.foundation",
-    "com.aframe.runtime",
-    "com.aframe.unity"
+    "com.aframe.core"
   ],
   "forbiddenPaths": [
     "Assets/Game/Generated",

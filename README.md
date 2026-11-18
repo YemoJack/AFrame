@@ -1,51 +1,79 @@
 # AFrame
 
-AFrame 是面向小型单机游戏的模块化 Unity 6.6 框架。纯 C# 模块在固定 Tick 中处理命令和输入，Unity 负责项目装配、场景和表现。视图用 Query 读取状态，用 Event 接收变化通知。App 服务跨会话保留，重开只创建一局新的 Session。
+AFrame 是面向小型单机游戏的 **Unity 6.6 模块化框架**。用纯 C# 写玩法规则，用 Unity 做输入、场景和表现。清晰的功能边界和任务检查也方便 AI 在指定范围内修改代码。
 
-v2.2 首版的五项补齐已验收，覆盖 EditMode 测试、架构和定义校验、Editor 运行与关闭时的任务检查，以及 macOS arm64 Mono Player 的 Character 双视图切换。详见 [首版验收清单](Docs/AFrame-v2.2-Acceptance.md)。
+## 架构图
 
-## 接入已有 Unity 项目
+![AFrame v2.2 架构图，展示运行时分层、启动流程和三个 UPM 包](Docs/architecture/aframe-v2.2-overview.png)
 
-通过 Git 克隆本仓库后，运行 `git lfs pull` 获取 2D 示例使用的精灵资源。
+[可编辑 draw.io](Docs/architecture/aframe-v2.2-overview.drawio) · [SVG](Docs/architecture/aframe-v2.2-overview.svg)
 
-关闭目标项目的 Unity 编辑器，在 AFrame 仓库根目录运行。需要 Python 3。
+- **一局游戏怎么启动？** Bootstrap 读取 Profile，启动跨场景保留的 App。开局时创建 Session，重开时重新创建 Session。
+- **状态怎么更新？** Session 默认每秒推进 50 次。在每次 Tick 中冻结持续输入、执行到期命令、推进玩法，再分发事件。
+- **画面怎么更新？** 视图通过 Query 读取持续状态，例如位置和计数。一次性的弹窗和特效用事件触发。
+
+## 从击杀到成就解锁
+
+第 10 次击杀将计数从 9 更新为 10，并首次解锁「猎手」。这个设计示例展示如何用现有 AFrame 接口接入战斗、击杀统计和成就模块。
+
+![击杀与成就解锁示例，从攻击命令到击杀计数、成就弹窗和存档](Docs/architecture/aframe-kill-achievement.png)
+
+[可编辑 draw.io](Docs/architecture/aframe-kill-achievement.drawio) · [SVG](Docs/architecture/aframe-kill-achievement.svg)
+
+攻击命令先入队。战斗模块在下一次 Tick 确认击杀，统计和成就模块依次处理事件。Tick 结束后，HUD 读取新计数。需要存档时，一起保存击杀数和已解锁的成就 ID。
+
+## 快速开始
+
+### 运行仓库自带的示例
+
+克隆仓库后，在项目根目录运行 `git lfs pull` 获取 2D 示例使用的精灵资源。用 **Unity 6000.6.9f1** 打开项目，选择一个场景进入 Play Mode。
+
+| 场景 | 怎么玩 | 能看到什么 |
+| --- | --- | --- |
+| [Character 2D](Assets/Game/Scenes/Character2D.unity) / [Character 3D](Assets/Game/Scenes/AFrameSampleScene.unity) | WASD 或方向键移动，Tab 切换视图 | 同一套角色规则驱动 2D 的 XY 平面和 3D 的 XZ 平面 |
+| [能源回收站](Assets/Game/Scenes/EnergyStation.unity) | 点击「开始」，WASD 移动，Shift 冲刺，在 45 秒内收集三枚核心并进入出口 | 拾取、背包、关卡状态、暂停和存档如何协作 |
+
+能源回收站支持 **Esc** 暂停或继续、**R** 重开、**F5** 保存。在主菜单按 **L** 或选择「读取存档」可继续上次进度。存档位于 `Application.persistentDataPath/AFrame/energy-station.json`。
+
+### 安装到已有 Unity 项目
+
+关闭目标项目的 Unity 编辑器，在 AFrame 仓库根目录用 Python 3 运行安装脚本。
 
 ```sh
 python3 Tools/install-aframe "/你的 Unity 项目路径"
 ```
 
-脚本会安装五个基础包并复制命令行工具。打开项目后，选择 **AFrame → Initialize Project**，再打开生成的 `Assets/Game/Scenes/AFrameStart.unity` 进入 Play Mode。Bootstrap 自动读取默认 Profile，启动带有 `SceneScope` 的场景。
+打开目标项目，选择 **AFrame → Initialize Project**，再打开生成的 `Assets/Game/Scenes/AFrameStart.unity` 进入 Play Mode。
 
-想直接试玩能源回收站，在首次安装时加上 `--sample`，并在 Unity 打开 EnergyStation 场景。安装示例后，在 **Player → Active Input Handling** 选择 **Both**。示例使用 Input System 读取移动输入，桌面 Player 的菜单按钮使用 IMGUI。示例需要空的 `Assets/Game` 路径，并随安装带入 Input System 和 Save 包。也可以直接在本仓库运行示例。
+| UPM 包 | 用途 | 如何安装 |
+| --- | --- | --- |
+| `com.aframe.core` | 基础类型、运行时、定义数据和 Unity 适配 | 默认安装 |
+| `com.aframe.editor` | 初始化、脚手架、导入、校验和 Context | 默认安装 |
+| `com.aframe.modules` | 存档工具与输入、物理、联机接口 | 加 `--modules` |
 
-## 开发玩法
+想把示例也装进目标项目，可以用 `--sample`。它会安装 Modules 并复制示例，需要未被占用的 `Assets/Game`。试玩前在 **Player → Active Input Handling** 选择 **Both**。
 
-1. 用 **AFrame → Generate → Feature** 生成功能骨架。规则放在 `Core`，跨功能公开接口放在 `Contracts`，视图和输入放在 `Unity`。
-2. 通过生成的模块资产在 `Composition` 装配玩法，将资产加入默认 Profile，再把视图挂到场景的 `SceneScope` 下。需要独立菜单或按场景装配模块时，实现 `AFrameSceneEntry`。
-3. 玩法配置可放在功能的 `Definitions/*.aframe.json`。导入后通过 App 服务提供强类型定义。本示例的角色速度由 [Character 定义](Assets/Game/Features/Character/Definitions/character.default.aframe.json)驱动。
-4. 修改功能后执行 **AFrame → Project → Build Context**，再校验架构。Git 中的 `Context/` 可供 AI 读取程序集依赖和公共 API，运行时无需 AI 服务。
+### 从旧分包升级
+
+关闭 Unity，备份并移出旧的 `Packages/com.aframe.*` 目录，包括旧 Editor。再从目标项目的 `Packages/manifest.json` 移除对应条目，然后运行新版安装脚本。已有示例或引用可选模块的项目使用 `--modules`，保留原来的 `Assets/Game`。原有程序集名称和脚本 GUID 继续使用。
+
+## 开发一个功能
+
+1. 用 **AFrame → Generate → Feature** 创建骨架。先在 `Contracts` 定义命令、事件和查询，再到 `Core` 实现规则。跨功能协作使用对方的 `Contracts`。
+2. 用 `Unity` 适配输入和视图，在 `Composition` 装配模块，通过 Profile 或场景入口启动。可调参数放进 `Definitions/*.aframe.json`，例如[角色移动速度](Assets/Game/Features/Character/Definitions/character.default.aframe.json)。
+3. 更新 `Context/` 并校验。目录里有场景、程序集依赖和公共 API，可作为 AI 开始修改前的项目索引。
 
 ```sh
-Tools/aframe task start <id>
 Tools/aframe import
 Tools/aframe context
-Tools/aframe test --feature character
-Tools/aframe check --task <id>
+Tools/aframe validate
 Tools/aframe smoke --scene Assets/Game/Scenes/EnergyStation.unity
 ```
 
-`check` 基于任务开始时的工作区，只检查本次改动，再运行声明的自动检查。`acceptance` 可写 EditMode 测试全名或通配符，也可用 `test:` 显式指定测试选择器。自然语言验收项会在报告中列出，供手工确认。CLI 可以启动批处理，也可以通过本地文件向当前 Editor 发出请求。报告在 `Logs/AFrame/`。
+给 AI 分配任务时，用 `Tasks/*.task.json` 写明目标、允许修改的路径和验收项。修改前运行 `Tools/aframe task start <id>` 记录基线，完成后运行 `Tools/aframe check --task <id>`。检查结果输出到 `Logs/AFrame/`。
 
-## Character 的 2D／3D 示例
+## 设计与验收
 
-打开 [Character2D.unity](Assets/Game/Scenes/Character2D.unity) 或 [AFrameSampleScene.unity](Assets/Game/Scenes/AFrameSampleScene.unity)，进入 Play Mode 后可用方向键或 WASD 移动，也可按 **Tab** 或用界面按钮切换场景。两个场景共用 Character 的命令、规则和输入。2D 将领域平面映射到 XY，3D 映射到 XZ。
-
-[首版验收清单](Docs/AFrame-v2.2-Acceptance.md)说明常用验证命令和验收状态。
-
-## 能源回收站
-
-打开 [EnergyStation.unity](Assets/Game/Scenes/EnergyStation.unity)，进入 Play Mode 后点击 **开始**。用 **WASD 或方向键**移动，按住 **Shift** 冲刺，在 **45 秒内**收集三个核心并进入出口。**Esc** 暂停或继续，**R** 重开。
-
-按 **F5** 或点 **保存** 可以手动保存一局。退出后重新打开游戏，在主菜单按 **L** 或点 **读取存档**。存档位于 `Application.persistentDataPath/AFrame/energy-station.json`，包含角色位置、核心、剩余时间和关卡状态。
-
-当前目标为桌面单人离线游戏。程序集、模块作用域、持久化和验证范围见 [v2.2 设计与迁移记录](Docs/AFrame-Architecture-v2.2.md)。
+- [v2.2 设计与迁移记录](Docs/AFrame-Architecture-v2.2.md)
+- [v2.2 首版验收清单](Docs/AFrame-v2.2-Acceptance.md)
+- 架构图和功能示例的呈现方式参考 [QFramework README](https://github.com/liangxiegame/QFramework#qframework-简介-intro)。

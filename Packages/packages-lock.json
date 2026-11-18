@@ -1,27 +1,10 @@
 {
   "dependencies": {
-    "com.aframe.audio": {
-      "version": "file:com.aframe.audio",
+    "com.aframe.core": {
+      "version": "file:com.aframe.core",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.aframe.runtime": "file:../com.aframe.runtime"
-      }
-    },
-    "com.aframe.camera": {
-      "version": "file:com.aframe.camera",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation"
-      }
-    },
-    "com.aframe.data": {
-      "version": "file:com.aframe.data",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
     },
@@ -30,80 +13,19 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
-        "com.aframe.runtime": "file:../com.aframe.runtime",
-        "com.aframe.data": "file:../com.aframe.data",
-        "com.aframe.unity": "file:../com.aframe.unity",
+        "com.aframe.core": "0.1.0",
         "com.unity.nuget.mono-cecil": "1.11.6",
-        "com.unity.test-framework": "1.8.0"
+        "com.unity.test-framework": "1.8.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
       }
     },
-    "com.aframe.foundation": {
-      "version": "file:com.aframe.foundation",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "com.aframe.input": {
-      "version": "file:com.aframe.input",
+    "com.aframe.modules": {
+      "version": "file:com.aframe.modules",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
-        "com.aframe.runtime": "file:../com.aframe.runtime",
+        "com.aframe.core": "0.1.0",
         "com.unity.inputsystem": "1.20.1"
-      }
-    },
-    "com.aframe.network": {
-      "version": "file:com.aframe.network",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
-        "com.aframe.runtime": "file:../com.aframe.runtime"
-      }
-    },
-    "com.aframe.physics": {
-      "version": "file:com.aframe.physics",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation"
-      }
-    },
-    "com.aframe.runtime": {
-      "version": "file:com.aframe.runtime",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation"
-      }
-    },
-    "com.aframe.save": {
-      "version": "file:com.aframe.save",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
-        "com.aframe.runtime": "file:../com.aframe.runtime"
-      }
-    },
-    "com.aframe.ui": {
-      "version": "file:com.aframe.ui",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.runtime": "file:../com.aframe.runtime"
-      }
-    },
-    "com.aframe.unity": {
-      "version": "file:com.aframe.unity",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.aframe.foundation": "file:../com.aframe.foundation",
-        "com.aframe.runtime": "file:../com.aframe.runtime",
-        "com.aframe.data": "file:../com.aframe.data"
       }
     },
     "com.unity.2d.sprite": {

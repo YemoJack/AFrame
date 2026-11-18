@@ -47,19 +47,22 @@ Packages/
     Runtime/Foundation/AFrame.Foundation.asmdef
     Runtime/Runtime/AFrame.Runtime.asmdef
     Runtime/Data/AFrame.Data.asmdef
-  com.aframe.unity/
+    Runtime/Data/Unity/AFrame.Data.Unity.asmdef
+    Runtime/Unity/AFrame.Unity.asmdef
   com.aframe.editor/
-  com.aframe.modules/          # 后续阶段启用；外部依赖较重的模块单独分包
+    Editor/AFrame.Editor.asmdef
+  com.aframe.modules/          # 可选，包含 Input、Save、Physics 和 Network
 ```
 
-包是分发边界，程序集是架构边界。首版可以把核心程序集放进同一个包，但不能合并程序集。
+包定义安装和分发范围。各 `.asmdef` 继续约束代码的引用方向。Editor 和 Modules 依赖 Core，默认只安装 Core 与 Editor。
 
 | 程序集                 | 可以引用                                                     | noEngineReferences |
 | ------------------- | -------------------------------------------------------- | ------------------ |
 | `AFrame.Foundation` | 无                                                        | 是                  |
 | `AFrame.Runtime`    | Foundation                                               | 是                  |
 | `AFrame.Data`       | Foundation                                               | 是                  |
-| `AFrame.Unity`      | Foundation、Runtime、Data                                  | 否                  |
+| `AFrame.Data.Unity` | Foundation、Data                                           | 否                  |
+| `AFrame.Unity`      | Foundation、Runtime、Data、Data.Unity                       | 否                  |
 | `AFrame.Editor`     | 以上全部（仅编辑器）                                               | 否                  |
 | `<F>.Contracts`     | Foundation、Runtime、Data、其他功能的 Contracts                  | 是                  |
 | `<F>.Core`          | 上一行全部 + 本功能的 Contracts                                   | 是                  |
@@ -643,13 +646,13 @@ aframe check --task <id>    范围检查 + compile + validate + 验收测试
 
 | 范围 | 当前实现 |
 | --- | --- |
-| 分包与装配 | 五个本地 UPM 基础包分开分发。保留 `IGameModule.Dependencies`、非泛型 `CommandEnvelope` 和兼容的队列入口。新增 `Require/Provide/ProvideMany` 及工厂依赖校验。App 与 Session 分容器，Scene 由 Unity 管理。 |
+| 分包与装配 | Core、Editor、Modules 三个本地 UPM 包保留独立程序集。保留 `IGameModule.Dependencies`、非泛型 `CommandEnvelope` 和兼容的队列入口。新增 `Require/Provide/ProvideMany` 及工厂依赖校验。App 与 Session 分容器，Scene 由 Unity 管理。 |
 | 启动与失败 | 从 Resources 自动加载 Profile 并创建持久宿主。启动失败逆序清理，未处理的 Tick 异常停止当前会话并记录现场。业务错误返回 `Result.Fail`。 |
 | 输入与视图 | 帧输入在 Tick 前冻结。领域事件先于视图分发，Tick 后读取查询并按累加器插值。场景视图解绑，2D 示例通过 Profile 的 Prefab 键生成角色。两个示例共用 Character Core，分别映射 XY 与 XZ。冲刺仍为按键持续状态。 |
 | 文本配置 | 保留 `id/schemaVersion/type` 头及 ScriptableObject 注册表。导入检查跨文件类型引用，支持按类型逐级迁移，产出 Contracts ID 常量与 `link.xml`。Character 速度由文本驱动。 |
 | AI 工具 | 识别 `feature.json`、程序集、稳定 ID、定义、Profile 支持范围及生成内容完整性。使用 Cecil 扫描 Player 程序集，并预览场景与 Prefab 校验 Bootstrap 和 SceneScope。CLI 支持 TestGame 的 EditMode 用例、任务基线及实际 Play Mode Smoke，Context 通过菜单或 CLI 更新。 |
-| 存档 | Save 包提供原子 JSON 文件写入。示例使用手写快照和一个存档槽，先校验再恢复。 |
-| 接入 | 安装脚本复制五个核心包和 CLI。编辑器初始化生成默认 Profile、最小场景及任务模板，能源回收站可选安装。 |
+| 存档 | Modules 内的 Save 程序集提供原子 JSON 文件写入。示例使用手写快照和一个存档槽，先校验再恢复。 |
+| 接入 | 安装脚本默认复制 Core、Editor 和 CLI。选择 `--modules` 安装可选模块，选择 `--sample` 同时安装可选模块和示例。编辑器初始化生成默认 Profile、最小场景及任务模板。 |
 
 定义源可选填 `"references": [{"id": "character.default", "type": "character"}]`。导入会验证目标存在且类型一致。schema 0 的 Character 用 `moveSpeed`，导入时迁移到 schema 1 的 `speed`，原文件保留。其他类型在编辑器可见程序集中实现 `IDefinitionMigration` 声明单步迁移。生成常量按所属 Contracts 程序集归档，空项目无需生成空常量类。
 

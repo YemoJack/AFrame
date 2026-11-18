@@ -135,6 +135,10 @@ Packages/packages-lock.json linguist-generated
 *.tiff                  lfs
 *.webp                  lfs
 
+# Keep README previews as regular Git blobs.
+Docs/architecture/aframe-v2.2-overview.png     -filter -diff -merge -text
+Docs/architecture/aframe-kill-achievement.png  -filter -diff -merge -text
+
 # Compressed Archive
 *.7z                    lfs
 *.bz2                   lfs

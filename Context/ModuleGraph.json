@@ -22,14 +22,14 @@
   "assemblies": [
     {
       "name": "AFrame.Data",
-      "path": "Packages/com.aframe.data/Runtime/AFrame.Data.asmdef",
+      "path": "Packages/com.aframe.core/Runtime/Data/AFrame.Data.asmdef",
       "references": [
         "AFrame.Foundation"
       ]
     },
     {
       "name": "AFrame.Data.Unity",
-      "path": "Packages/com.aframe.data/Runtime/Unity/AFrame.Data.Unity.asmdef",
+      "path": "Packages/com.aframe.core/Runtime/Data/Unity/AFrame.Data.Unity.asmdef",
       "references": [
         "AFrame.Data",
         "AFrame.Foundation",
@@ -53,7 +53,7 @@
     },
     {
       "name": "AFrame.Foundation",
-      "path": "Packages/com.aframe.foundation/Runtime/AFrame.Foundation.asmdef",
+      "path": "Packages/com.aframe.core/Runtime/Foundation/AFrame.Foundation.asmdef",
       "references": []
     },
     {
@@ -213,7 +213,7 @@
     },
     {
       "name": "AFrame.Input",
-      "path": "Packages/com.aframe.input/Runtime/AFrame.Input.asmdef",
+      "path": "Packages/com.aframe.modules/Runtime/Input/AFrame.Input.asmdef",
       "references": [
         "AFrame.Foundation",
         "AFrame.Runtime"
@@ -221,7 +221,7 @@
     },
     {
       "name": "AFrame.Network",
-      "path": "Packages/com.aframe.network/Runtime/AFrame.Network.asmdef",
+      "path": "Packages/com.aframe.modules/Runtime/Network/AFrame.Network.asmdef",
       "references": [
         "AFrame.Foundation",
         "AFrame.Runtime"
@@ -229,14 +229,14 @@
     },
     {
       "name": "AFrame.Physics",
-      "path": "Packages/com.aframe.physics/Runtime/AFrame.Physics.asmdef",
+      "path": "Packages/com.aframe.modules/Runtime/Physics/AFrame.Physics.asmdef",
       "references": [
         "AFrame.Foundation"
       ]
     },
     {
       "name": "AFrame.Runtime",
-      "path": "Packages/com.aframe.runtime/Runtime/AFrame.Runtime.asmdef",
+      "path": "Packages/com.aframe.core/Runtime/Runtime/AFrame.Runtime.asmdef",
       "references": [
         "AFrame.Foundation"
       ]
@@ -256,7 +256,7 @@
     },
     {
       "name": "AFrame.Save",
-      "path": "Packages/com.aframe.save/Runtime/AFrame.Save.asmdef",
+      "path": "Packages/com.aframe.modules/Runtime/Save/AFrame.Save.asmdef",
       "references": [
         "AFrame.Foundation",
         "AFrame.Runtime"
@@ -274,7 +274,7 @@
     },
     {
       "name": "AFrame.Unity",
-      "path": "Packages/com.aframe.unity/Runtime/AFrame.Unity.asmdef",
+      "path": "Packages/com.aframe.core/Runtime/Unity/AFrame.Unity.asmdef",
       "references": [
         "AFrame.Data",
         "AFrame.Data.Unity",

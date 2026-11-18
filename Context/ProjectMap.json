@@ -15,17 +15,8 @@
     "Assets/Game/Features/Pickup/feature.json"
   ],
   "packages": [
-    "com.aframe.audio",
-    "com.aframe.camera",
-    "com.aframe.data",
+    "com.aframe.core",
     "com.aframe.editor",
-    "com.aframe.foundation",
-    "com.aframe.input",
-    "com.aframe.network",
-    "com.aframe.physics",
-    "com.aframe.runtime",
-    "com.aframe.save",
-    "com.aframe.ui",
-    "com.aframe.unity"
+    "com.aframe.modules"
   ]
 }

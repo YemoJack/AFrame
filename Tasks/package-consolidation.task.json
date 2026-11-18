@@ -1,0 +1,19 @@
+{
+  "id": "package-consolidation",
+  "goal": "Consolidate UPM distribution into Core, Editor and optional Modules while preserving assembly boundaries and Unity asset GUIDs, and document the architecture and a feature flow in README.",
+  "allowedPaths": [
+    "Packages/com.aframe.*/**",
+    "Packages/manifest.json",
+    "Packages/packages-lock.json",
+    "Tools/install-aframe",
+    ".gitattributes",
+    "README.md",
+    "Docs/AFrame-Architecture-v2.2.md",
+    "Docs/architecture/aframe-v2.2-overview.*",
+    "Docs/architecture/aframe-kill-achievement.*",
+    "Tasks/character-movement.task.json",
+    "Tasks/package-consolidation.task.json",
+    "Context/**"
+  ],
+  "acceptanceChecks": ["smoke"]
+}

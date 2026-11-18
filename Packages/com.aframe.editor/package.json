@@ -9,11 +9,9 @@
   },
   "type": "library",
   "dependencies": {
-    "com.aframe.foundation": "file:../com.aframe.foundation",
-    "com.aframe.runtime": "file:../com.aframe.runtime",
-    "com.aframe.data": "file:../com.aframe.data",
-    "com.aframe.unity": "file:../com.aframe.unity",
+    "com.aframe.core": "0.1.0",
     "com.unity.nuget.mono-cecil": "1.11.6",
-    "com.unity.test-framework": "1.8.0"
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.modules.jsonserialize": "1.0.0"
   }
 }

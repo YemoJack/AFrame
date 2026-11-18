@@ -1,7 +1,7 @@
 [
   {
     "assembly": "AFrame.Data",
-    "path": "Packages/com.aframe.data/Runtime/AFrame.Data.asmdef",
+    "path": "Packages/com.aframe.core/Runtime/Data/AFrame.Data.asmdef",
     "types": [
       {
         "name": "AFrame.Data.DefinitionDocument",
@@ -43,7 +43,7 @@
   },
   {
     "assembly": "AFrame.Data.Unity",
-    "path": "Packages/com.aframe.data/Runtime/Unity/AFrame.Data.Unity.asmdef",
+    "path": "Packages/com.aframe.core/Runtime/Data/Unity/AFrame.Data.Unity.asmdef",
     "types": [
       {
         "name": "AFrame.Data.AFrameDefinitionAsset",
@@ -174,7 +174,7 @@
   },
   {
     "assembly": "AFrame.Foundation",
-    "path": "Packages/com.aframe.foundation/Runtime/AFrame.Foundation.asmdef",
+    "path": "Packages/com.aframe.core/Runtime/Foundation/AFrame.Foundation.asmdef",
     "types": [
       {
         "name": "AFrame.Foundation.AFrameError",
@@ -704,7 +704,7 @@
   },
   {
     "assembly": "AFrame.Input",
-    "path": "Packages/com.aframe.input/Runtime/AFrame.Input.asmdef",
+    "path": "Packages/com.aframe.modules/Runtime/Input/AFrame.Input.asmdef",
     "types": [
       {
         "name": "AFrame.Input.IInputSource",
@@ -726,7 +726,7 @@
   },
   {
     "assembly": "AFrame.Network",
-    "path": "Packages/com.aframe.network/Runtime/AFrame.Network.asmdef",
+    "path": "Packages/com.aframe.modules/Runtime/Network/AFrame.Network.asmdef",
     "types": [
       {
         "name": "AFrame.Network.INetworkSession",
@@ -752,7 +752,7 @@
   },
   {
     "assembly": "AFrame.Physics",
-    "path": "Packages/com.aframe.physics/Runtime/AFrame.Physics.asmdef",
+    "path": "Packages/com.aframe.modules/Runtime/Physics/AFrame.Physics.asmdef",
     "types": [
       {
         "name": "AFrame.Physics.IPhysicsQuery",
@@ -776,7 +776,7 @@
   },
   {
     "assembly": "AFrame.Runtime",
-    "path": "Packages/com.aframe.runtime/Runtime/AFrame.Runtime.asmdef",
+    "path": "Packages/com.aframe.core/Runtime/Runtime/AFrame.Runtime.asmdef",
     "types": [
       {
         "name": "AFrame.Runtime.CommandDispatcher",
@@ -1090,7 +1090,7 @@
   },
   {
     "assembly": "AFrame.Save",
-    "path": "Packages/com.aframe.save/Runtime/AFrame.Save.asmdef",
+    "path": "Packages/com.aframe.modules/Runtime/Save/AFrame.Save.asmdef",
     "types": [
       {
         "name": "AFrame.Save.AtomicJsonFile",
@@ -1131,7 +1131,7 @@
   },
   {
     "assembly": "AFrame.Unity",
-    "path": "Packages/com.aframe.unity/Runtime/AFrame.Unity.asmdef",
+    "path": "Packages/com.aframe.core/Runtime/Unity/AFrame.Unity.asmdef",
     "types": [
       {
         "name": "AFrame.Unity.AFrameBootstrap",

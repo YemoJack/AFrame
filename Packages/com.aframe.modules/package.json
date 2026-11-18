@@ -1,0 +1,15 @@
+{
+  "name": "com.aframe.modules",
+  "version": "0.1.0",
+  "displayName": "AFrame Modules",
+  "description": "Optional AFrame input, save, physics and network modules.",
+  "unity": "6000.6",
+  "author": {
+    "name": "AFrame"
+  },
+  "type": "library",
+  "dependencies": {
+    "com.aframe.core": "0.1.0",
+    "com.unity.inputsystem": "1.20.1"
+  }
+}

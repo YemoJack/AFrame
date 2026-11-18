@@ -8,8 +8,11 @@ import tempfile
 from pathlib import Path
 
 
-CORE_PACKAGES = tuple(
-    f"com.aframe.{part}" for part in ("foundation", "runtime", "data", "unity", "editor")
+BASE_PACKAGES = ("com.aframe.core", "com.aframe.editor")
+LEGACY_PACKAGES = (
+    "com.aframe.foundation", "com.aframe.runtime", "com.aframe.data", "com.aframe.unity",
+    "com.aframe.input", "com.aframe.save", "com.aframe.physics", "com.aframe.network",
+    "com.aframe.ui", "com.aframe.audio", "com.aframe.camera",
 )
 
 
@@ -21,7 +24,7 @@ def package_files(directory):
     }
 
 
-def install(project, with_sample=False):
+def install(project, *, with_modules=False, with_sample=False):
     packages = project / "Packages"
     manifest_path = packages / "manifest.json"
     if not (project / "ProjectSettings/ProjectVersion.txt").is_file() or not manifest_path.is_file():
@@ -31,7 +34,7 @@ def install(project, with_sample=False):
         raise ValueError("Close the target Unity Editor before installation.")
     repository = Path(__file__).resolve().parent.parent
     source = repository / "Packages"
-    names = CORE_PACKAGES + (("com.aframe.save",) if with_sample else ())
+    names = BASE_PACKAGES + (("com.aframe.modules",) if with_modules or with_sample else ())
     tool = project / "Tools/aframe"
     launcher = repository / "Tools/aframe"
     if tool.is_symlink() or tool.exists() and (not tool.is_file() or tool.read_bytes() != launcher.read_bytes()):
@@ -48,6 +51,15 @@ def install(project, with_sample=False):
         raise ValueError("Packages/manifest.json must contain a dependencies object.")
 
     dependencies = manifest["dependencies"]
+    legacy = [
+        name for name in LEGACY_PACKAGES
+        if name in dependencies or (packages / name).exists() or (packages / name).is_symlink()
+    ]
+    if legacy:
+        raise ValueError(
+            f"Found legacy AFrame packages: {', '.join(legacy)}. "
+            "Follow the upgrade steps in the AFrame README before installing."
+        )
     previous_dependencies = dependencies.copy()
     pending = []
     for name in names:
@@ -68,12 +80,9 @@ def install(project, with_sample=False):
             pending.append(name)
         dependencies[name] = entry
 
-    dependencies.setdefault("com.unity.modules.jsonserialize", "1.0.0")
-    dependencies.setdefault("com.unity.nuget.newtonsoft-json", "3.2.1")
     if with_sample:
-        for name, version in {"com.unity.inputsystem": "1.20.1", "com.unity.modules.physics": "1.0.0",
-                              "com.unity.modules.imgui": "1.0.0"}.items():
-            dependencies.setdefault(name, version)
+        dependencies.setdefault("com.unity.modules.physics", "1.0.0")
+        dependencies.setdefault("com.unity.modules.imgui", "1.0.0")
     copy_tool = not tool.exists()
     copy_sample = with_sample and not sample.exists()
     if not pending and not copy_tool and not copy_sample and dependencies == previous_dependencies:
@@ -129,9 +138,10 @@ def install(project, with_sample=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Install the AFrame framework into an existing Unity project.")
     parser.add_argument("project", type=Path, help="Path to the target Unity project root")
-    parser.add_argument("--sample", action="store_true", help="Copy the Energy Station sample into an unused Assets/Game directory")
+    parser.add_argument("--modules", action="store_true", help="Install optional input, save, physics and network modules")
+    parser.add_argument("--sample", action="store_true", help="Install Modules and copy the sample into Assets/Game")
     args = parser.parse_args()
     try:
-        install(args.project.expanduser().resolve(), args.sample)
+        install(args.project.expanduser().resolve(), with_modules=args.modules, with_sample=args.sample)
     except (OSError, ValueError) as error:
         parser.exit(1, f"AFrame install failed: {error}\n")
